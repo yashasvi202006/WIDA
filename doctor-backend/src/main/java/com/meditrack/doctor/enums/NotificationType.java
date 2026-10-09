@@ -1,0 +1,12 @@
+package com.meditrack.doctor.enums;
+
+public enum NotificationType {
+    APPOINTMENT_REQUEST,
+    APPOINTMENT_ACCEPTED,
+    APPOINTMENT_CANCELLED,
+    APPOINTMENT_RESCHEDULED,
+    NEW_PATIENT_INTERACTION,
+    PRESCRIPTION_ALERT,
+    LAB_REPORT_READY,
+    SYSTEM
+}
