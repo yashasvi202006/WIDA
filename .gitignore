@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-pharmacy
 dist-ssr
 *.local
 
@@ -29,3 +30,10 @@ dist/
 .env
 .env.local
 *.log
+
+# Java build output
+target/
+bin/
+*.class
+*.db
+*.jar
