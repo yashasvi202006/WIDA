@@ -55,11 +55,15 @@ class PatientApiClient {
     const { params, headers, ...restOptions } = options;
     const url = this.buildUrl(path, params);
 
-    // Auto-ensure Mock Service Worker is controlling the client
+    // Only auto-start MSW if Java backend is NOT available
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator && !navigator.serviceWorker.controller) {
       try {
-        const { ensureMswActive } = await import('../../../mocks/browser');
-        await ensureMswActive();
+        const javaAlive = await fetch('http://localhost:8080/api/system/health', { signal: AbortSignal.timeout(400) })
+          .then(r => r.ok).catch(() => false);
+        if (!javaAlive) {
+          const { ensureMswActive } = await import('../../../mocks/browser');
+          await ensureMswActive();
+        }
       } catch {
         // Fallback to regular fetch
       }

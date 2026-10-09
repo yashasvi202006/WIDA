@@ -29,3 +29,10 @@ dist/
 .env
 .env.local
 *.log
+
+# Java build output
+target/
+bin/
+*.class
+*.db
+*.jar

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Menu, Moon, Sun, User, Shield, Settings, LogOut, FileText, Pill } from 'lucide-react';
+import { Search, Menu, Moon, Sun, User, Shield, Settings, LogOut, FileText, Pill, UserPlus } from 'lucide-react';
 import { NotificationBell } from './NotificationBell';
 import type { PatientNotification, PatientProfile } from '../types/patientTypes';
 
@@ -203,7 +203,7 @@ export const PatientTopbar: React.FC<PatientTopbarProps> = ({
               color: 'var(--p-text-main)',
               cursor: 'pointer'
             }}
-            title="Click to open MSW Mock Backend API Diagnostics"
+            title="Click to open Java Backend & SQLite Database Console"
           >
             <span
               style={{
@@ -214,7 +214,7 @@ export const PatientTopbar: React.FC<PatientTopbarProps> = ({
                 boxShadow: '0 0 6px #10B981'
               }}
             />
-            <span>MSW API Active</span>
+            <span>Java DB (8080) Active</span>
           </button>
         )}
 
@@ -325,6 +325,16 @@ export const PatientTopbar: React.FC<PatientTopbarProps> = ({
                   }}
                 >
                   <Settings size={15} /> Settings
+                </button>
+                <button
+                  className="patient-nav-item py-2 text-teal"
+                  style={{ color: 'var(--p-primary)' }}
+                  onClick={() => {
+                    setProfileOpen(false);
+                    onSelectTab('register');
+                  }}
+                >
+                  <UserPlus size={15} /> Create New Account
                 </button>
                 <button
                   className="patient-nav-item py-2 text-danger"
