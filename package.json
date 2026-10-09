@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:pharmacy": "vite --config vite.pharmacy.config.js",
     "build": "vite build",
+    "build:pharmacy": "vite build --config vite.pharmacy.config.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

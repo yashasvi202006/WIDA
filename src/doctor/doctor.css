@@ -1,0 +1,3122 @@
+/* ========================================================
+   MEDiTRACK / WIDA — DOCTOR MODULE STYLESHEET
+   Design: Premium Healthcare · Light Aqua/Teal Palette
+   Matches: WIDA Patient Dashboard Design System
+   Module Owner: Vanshika Tailor
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Design Tokens ──────────────────────────────────────── */
+:root {
+  /* Brand Palette */
+  --doc-primary:        #0e9ab4;   /* teal-cyan dominant accent */
+  --doc-primary-dark:   #0b7d93;
+  --doc-primary-light:  #d0f0f8;
+  --doc-primary-subtle: #edfafd;
+
+  --doc-teal:           #0d9488;
+  --doc-teal-dark:      #0f766e;
+  --doc-teal-light:     #ccfbf1;
+  --doc-teal-subtle:    #f0fdfa;
+
+  --doc-mint:           #a7f3d0;
+  --doc-aqua:           #67e8f9;
+
+  /* Backgrounds */
+  --doc-bg:             #f0f8fb;   /* very light aqua-tinted bg */
+  --doc-surface:        #ffffff;
+  --doc-surface-muted:  #f4fafb;
+  --doc-surface-glass:  rgba(255,255,255,0.72);
+
+  /* Borders */
+  --doc-border:         #cde9ef;
+  --doc-border-strong:  #a8d5df;
+
+  /* Text */
+  --doc-text-main:      #0c2d3a;   /* deep navy */
+  --doc-text-sub:       #1e5568;   /* mid navy */
+  --doc-text-muted:     #5a8494;
+  --doc-text-soft:      #90b4bf;
+
+  /* State Colours */
+  --doc-success:        #10b981;
+  --doc-success-bg:     #ecfdf5;
+  --doc-success-border: #a7f3d0;
+
+  --doc-warning:        #f59e0b;
+  --doc-warning-bg:     #fffbeb;
+  --doc-warning-border: #fde68a;
+
+  --doc-danger:         #ef4444;
+  --doc-danger-bg:      #fef2f2;
+  --doc-danger-border:  #fecaca;
+
+  /* Geometry */
+  --doc-radius-xs:  4px;
+  --doc-radius-sm:  8px;
+  --doc-radius:     12px;
+  --doc-radius-lg:  18px;
+  --doc-radius-xl:  24px;
+
+  /* Shadows */
+  --doc-shadow-xs: 0 1px 2px rgba(12,45,58,0.04);
+  --doc-shadow-sm: 0 2px 8px rgba(12,45,58,0.06);
+  --doc-shadow:    0 4px 16px rgba(12,45,58,0.09), 0 1px 4px rgba(12,45,58,0.05);
+  --doc-shadow-md: 0 8px 24px rgba(12,45,58,0.11), 0 2px 8px rgba(12,45,58,0.06);
+  --doc-shadow-lg: 0 16px 40px rgba(12,45,58,0.13), 0 4px 12px rgba(12,45,58,0.07);
+
+  /* Sidebar */
+  --doc-sidebar-w: 256px;
+  --doc-topnav-h:  68px;
+
+  /* Typography */
+  --doc-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ── Base Reset ─────────────────────────────────────────── */
+.doc-app {
+  font-family: var(--doc-font);
+  color: var(--doc-text-main);
+  background-color: var(--doc-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.doc-app * {
+  box-sizing: border-box;
+}
+
+/* ── Auth Screens ───────────────────────────────────────── */
+.doc-auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(140deg, #e0f7fa 0%, #f0fafb 40%, #e8fff8 80%, #d0f0f8 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-auth-container::before {
+  content: '';
+  position: absolute;
+  top: -120px; right: -120px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(14,154,180,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.doc-auth-container::after {
+  content: '';
+  position: absolute;
+  bottom: -100px; left: -100px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(13,148,136,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.doc-auth-card {
+  background: var(--doc-surface);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-xl);
+  box-shadow: var(--doc-shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 36px;
+  position: relative;
+  z-index: 1;
+  animation: docSlideUp 0.35s cubic-bezier(.25,.8,.25,1);
+}
+
+.doc-auth-card.wide {
+  max-width: 880px;
+}
+
+@keyframes docSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.doc-auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.doc-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, var(--doc-primary-subtle), var(--doc-teal-subtle));
+  border: 1px solid var(--doc-primary-light);
+  color: var(--doc-primary-dark);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  margin-bottom: 14px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.doc-auth-header h1 {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--doc-text-main);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+.doc-auth-header p {
+  font-size: 14px;
+  color: var(--doc-text-muted);
+  margin: 0;
+}
+
+/* ── Form Elements ──────────────────────────────────────── */
+.doc-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.doc-form-grid.single-col {
+  grid-template-columns: 1fr;
+}
+
+.doc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.doc-form-group.full-width {
+  grid-column: span 2;
+}
+
+.doc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--doc-text-sub);
+}
+
+.doc-label .req {
+  color: var(--doc-danger);
+  margin-left: 2px;
+}
+
+.doc-input,
+.doc-select,
+.doc-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: var(--doc-font);
+  border: 1.5px solid var(--doc-border-strong);
+  border-radius: var(--doc-radius);
+  background-color: var(--doc-surface-muted);
+  color: var(--doc-text-main);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.doc-input:focus,
+.doc-select:focus,
+.doc-textarea:focus {
+  border-color: var(--doc-primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(14, 154, 180, 0.14);
+}
+
+.doc-input.has-error {
+  border-color: var(--doc-danger);
+}
+
+.doc-error-msg {
+  font-size: 12px;
+  color: var(--doc-danger);
+  margin-top: 2px;
+}
+
+.doc-hint {
+  font-size: 12px;
+  color: var(--doc-text-muted);
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: var(--doc-font);
+  border-radius: var(--doc-radius);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+
+.doc-btn-primary {
+  background: linear-gradient(135deg, var(--doc-primary) 0%, var(--doc-primary-dark) 100%);
+  color: #fff;
+  border-color: var(--doc-primary-dark);
+  box-shadow: 0 3px 10px rgba(14,154,180,0.28);
+}
+
+.doc-btn-primary:hover {
+  background: linear-gradient(135deg, var(--doc-primary-dark) 0%, #0a6980 100%);
+  box-shadow: 0 5px 16px rgba(14,154,180,0.38);
+  transform: translateY(-1px);
+}
+
+.doc-btn-secondary {
+  background: linear-gradient(135deg, var(--doc-teal) 0%, var(--doc-teal-dark) 100%);
+  color: #fff;
+  border-color: var(--doc-teal-dark);
+  box-shadow: 0 3px 10px rgba(13,148,136,0.25);
+}
+
+.doc-btn-secondary:hover {
+  background: linear-gradient(135deg, var(--doc-teal-dark) 0%, #085f58 100%);
+  box-shadow: 0 5px 16px rgba(13,148,136,0.35);
+  transform: translateY(-1px);
+}
+
+.doc-btn-outline {
+  background: var(--doc-surface);
+  border-color: var(--doc-border-strong);
+  color: var(--doc-text-sub);
+}
+
+.doc-btn-outline:hover {
+  background: var(--doc-primary-subtle);
+  border-color: var(--doc-primary);
+  color: var(--doc-primary-dark);
+}
+
+.doc-btn-ghost {
+  background: transparent;
+  color: var(--doc-text-muted);
+  border-color: transparent;
+}
+
+.doc-btn-ghost:hover {
+  background: var(--doc-surface-muted);
+  color: var(--doc-text-main);
+}
+
+.doc-btn-sm {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  border-radius: var(--doc-radius-sm);
+}
+
+.doc-btn-lg {
+  padding: 14px 26px;
+  font-size: 15px;
+}
+
+.doc-btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  border-color: #dc2626;
+  box-shadow: 0 3px 10px rgba(239,68,68,0.25);
+}
+
+.doc-btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-1px);
+}
+
+.doc-btn-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  border-color: #059669;
+  box-shadow: 0 3px 10px rgba(16,185,129,0.25);
+}
+
+.doc-btn-success:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-1px);
+}
+
+/* ── App Layout ─────────────────────────────────────────── */
+.doc-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.doc-sidebar {
+  width: var(--doc-sidebar-w);
+  background: linear-gradient(180deg, #0c2d3a 0%, #0e3d4f 40%, #0c3342 100%);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+  transition: width 0.3s ease;
+  flex-shrink: 0;
+}
+
+.doc-sidebar-header {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doc-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doc-logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--doc-radius);
+  background: linear-gradient(135deg, var(--doc-primary) 0%, var(--doc-teal) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 17px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(14,154,180,0.45);
+}
+
+.doc-logo-text h2 {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.doc-logo-text span {
+  font-size: 10px;
+  color: var(--doc-aqua);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* Sidebar Divider / Section Label */
+.doc-sidebar-section-label {
+  padding: 14px 20px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,0.28);
+}
+
+.doc-sidebar-nav {
+  padding: 10px 10px 0;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  scrollbar-width: none;
+}
+
+.doc-sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.doc-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 14px;
+  border-radius: var(--doc-radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.58);
+  background: transparent;
+  border: 1px solid transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+}
+
+.doc-nav-item:hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.88);
+  border-color: rgba(255,255,255,0.07);
+}
+
+.doc-nav-item.active {
+  background: linear-gradient(90deg, rgba(14,154,180,0.25) 0%, rgba(14,154,180,0.08) 100%);
+  color: #67e8f9;
+  font-weight: 700;
+  border-color: rgba(14,154,180,0.3);
+  box-shadow: inset 3px 0 0 var(--doc-primary);
+}
+
+.doc-nav-item.active .doc-nav-icon {
+  filter: brightness(1.2);
+}
+
+.doc-nav-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.doc-nav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.doc-nav-badge {
+  margin-left: auto;
+  background: var(--doc-primary);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(14,154,180,0.4);
+}
+
+.doc-sidebar-footer {
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── Main Content Area ──────────────────────────────────── */
+.doc-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--doc-bg);
+  overflow-x: hidden;
+}
+
+.doc-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--doc-bg);
+}
+
+/* ── Top Navigation Bar ─────────────────────────────────── */
+.doc-topnav {
+  height: var(--doc-topnav-h);
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--doc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 8px rgba(12,45,58,0.05);
+}
+
+.doc-topnav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.doc-topnav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.doc-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--doc-primary-light);
+  box-shadow: 0 2px 8px rgba(14,154,180,0.2);
+}
+
+.doc-avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.doc-user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-user-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--doc-text-main);
+  line-height: 1.2;
+}
+
+.doc-user-role {
+  font-size: 11.5px;
+  color: var(--doc-primary);
+  font-weight: 500;
+}
+
+/* Demo Doctor Switcher */
+.doc-demo-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--doc-primary-subtle);
+  border: 1.5px solid var(--doc-primary-light);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  color: var(--doc-primary-dark);
+  font-weight: 600;
+}
+
+.doc-demo-select {
+  border: none;
+  background: transparent;
+  color: var(--doc-primary-dark);
+  font-weight: 700;
+  font-size: 12.5px;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--doc-font);
+}
+
+/* ── Body Scroll Area ───────────────────────────────────── */
+.doc-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f7fafc;
+  overflow-x: hidden;
+}
+
+.doc-body {
+  padding: 28px;
+  flex: 1;
+}
+
+.doc-content {
+  flex: 1;
+  min-width: 0;
+  padding: 28px;
+  overflow-y: auto;
+}
+
+.doc-content.doc-content-dashboard {
+  padding: 0;
+  overflow-y: auto;
+}
+
+/* ── Page Header ────────────────────────────────────────── */
+.doc-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.doc-page-title h1 {
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--doc-text-main);
+  margin: 0 0 5px 0;
+  letter-spacing: -0.3px;
+}
+
+.doc-page-title p {
+  font-size: 13.5px;
+  color: var(--doc-text-muted);
+  margin: 0;
+}
+
+/* ── KPI Summary Cards ──────────────────────────────────── */
+.doc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.doc-kpi-card {
+  background: var(--doc-surface);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-lg);
+  padding: 20px 18px;
+  box-shadow: var(--doc-shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  right: 0; height: 3px;
+  border-radius: var(--doc-radius-lg) var(--doc-radius-lg) 0 0;
+  background: var(--doc-kpi-accent, var(--doc-primary));
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+
+.doc-kpi-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--doc-shadow-md);
+}
+
+.doc-kpi-card:hover::before {
+  opacity: 1;
+}
+
+.doc-kpi-blue  { --doc-kpi-accent: var(--doc-primary); }
+.doc-kpi-teal  { --doc-kpi-accent: var(--doc-teal); }
+.doc-kpi-amber { --doc-kpi-accent: var(--doc-warning); }
+.doc-kpi-green { --doc-kpi-accent: var(--doc-success); }
+.doc-kpi-purple{ --doc-kpi-accent: #9333ea; }
+
+.doc-kpi-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--doc-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.doc-kpi-blue  .doc-kpi-icon-inner,
+.doc-kpi-card.doc-kpi-blue  .doc-kpi-icon { background: var(--doc-primary-light); color: var(--doc-primary); }
+.doc-kpi-card.doc-kpi-teal  .doc-kpi-icon { background: var(--doc-teal-light); color: var(--doc-teal); }
+.doc-kpi-card.doc-kpi-amber .doc-kpi-icon { background: var(--doc-warning-bg); color: var(--doc-warning); }
+.doc-kpi-card.doc-kpi-green .doc-kpi-icon { background: var(--doc-success-bg); color: var(--doc-success); }
+.doc-kpi-card.doc-kpi-purple .doc-kpi-icon { background: #f3e8ff; color: #9333ea; }
+
+/* Non-nested approach */
+.doc-kpi-blue  { }
+.doc-kpi-icon.doc-kpi-blue   { background: var(--doc-primary-light); color: var(--doc-primary); }
+.doc-kpi-icon.doc-kpi-teal   { background: var(--doc-teal-light);    color: var(--doc-teal); }
+.doc-kpi-icon.doc-kpi-amber  { background: var(--doc-warning-bg);    color: #d97706; }
+.doc-kpi-icon.doc-kpi-green  { background: var(--doc-success-bg);    color: var(--doc-success); }
+.doc-kpi-icon.doc-kpi-purple { background: #f3e8ff;                  color: #9333ea; }
+
+.doc-kpi-info h3 {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--doc-text-muted);
+  margin: 0 0 4px 0;
+}
+
+.doc-kpi-info .val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--doc-text-main);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.doc-kpi-info .sub {
+  font-size: 11.5px;
+  color: var(--doc-text-soft);
+  margin-top: 4px;
+}
+
+/* ── Cards ──────────────────────────────────────────────── */
+.doc-card {
+  background: var(--doc-surface);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-lg);
+  box-shadow: var(--doc-shadow-sm);
+  padding: 22px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.2s ease;
+}
+
+.doc-card:hover {
+  box-shadow: var(--doc-shadow);
+}
+
+.doc-content .doc-card:last-child {
+  margin-bottom: 0;
+}
+
+.doc-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--doc-border);
+}
+
+.doc-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--doc-text-main);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.1px;
+}
+
+/* ── Tables ─────────────────────────────────────────────── */
+.doc-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+}
+
+.doc-table th {
+  background: var(--doc-surface-muted);
+  color: var(--doc-text-muted);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--doc-border);
+  white-space: nowrap;
+}
+
+.doc-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--doc-border);
+  color: var(--doc-text-main);
+  font-size: 13.5px;
+}
+
+.doc-table tr:last-child td {
+  border-bottom: none;
+}
+
+.doc-table tr:hover td {
+  background: var(--doc-primary-subtle);
+}
+
+/* ── Badges ─────────────────────────────────────────────── */
+.doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.doc-badge-pending {
+  background: var(--doc-warning-bg);
+  color: #b45309;
+  border: 1px solid var(--doc-warning-border);
+}
+
+.doc-badge-verified,
+.doc-badge-accepted,
+.doc-badge-completed {
+  background: var(--doc-success-bg);
+  color: #047857;
+  border: 1px solid var(--doc-success-border);
+}
+
+.doc-badge-rejected,
+.doc-badge-cancelled {
+  background: var(--doc-danger-bg);
+  color: #b91c1c;
+  border: 1px solid var(--doc-danger-border);
+}
+
+.doc-badge-rescheduled,
+.doc-badge-review {
+  background: var(--doc-primary-light);
+  color: var(--doc-primary-dark);
+  border: 1px solid rgba(14,154,180,0.25);
+}
+
+/* ── Tabs & Filter Bar ──────────────────────────────────── */
+.doc-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.doc-tabs {
+  display: flex;
+  background: var(--doc-surface-muted);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  padding: 4px;
+  gap: 3px;
+  overflow-x: auto;
+}
+
+.doc-tab-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--doc-radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--doc-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  font-family: var(--doc-font);
+}
+
+.doc-tab-btn:hover {
+  color: var(--doc-text-main);
+  background: rgba(255,255,255,0.6);
+}
+
+.doc-tab-btn.active {
+  background: var(--doc-surface);
+  color: var(--doc-primary);
+  font-weight: 700;
+  box-shadow: var(--doc-shadow-xs);
+}
+
+.doc-search-box {
+  display: flex;
+  align-items: center;
+  position: relative;
+  min-width: 260px;
+}
+
+.doc-search-input {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  font-size: 13.5px;
+  font-family: var(--doc-font);
+  border: 1.5px solid var(--doc-border-strong);
+  border-radius: var(--doc-radius);
+  outline: none;
+  background: var(--doc-surface);
+  color: var(--doc-text-main);
+  transition: all 0.2s ease;
+}
+
+.doc-search-input:focus {
+  border-color: var(--doc-primary);
+  box-shadow: 0 0 0 3px rgba(14,154,180,0.12);
+}
+
+.doc-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--doc-text-soft);
+  font-size: 14px;
+}
+
+/* ── Modals ─────────────────────────────────────────────── */
+.doc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 45, 58, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+  animation: docFadeOverlay 0.2s ease;
+}
+
+@keyframes docFadeOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.doc-modal {
+  background: var(--doc-surface);
+  border-radius: var(--doc-radius-xl);
+  box-shadow: var(--doc-shadow-lg);
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: docFadeIn 0.25s cubic-bezier(.25,.8,.25,1);
+}
+
+.doc-modal.modal-lg {
+  max-width: 880px;
+}
+
+@keyframes docFadeIn {
+  from { opacity: 0; transform: scale(0.97) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+.doc-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--doc-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--doc-surface-muted);
+}
+
+.doc-modal-header h2,
+.doc-modal-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--doc-text-main);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.doc-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: var(--doc-text-muted);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+
+.doc-modal-close:hover {
+  background: var(--doc-danger-bg);
+  color: var(--doc-danger);
+}
+
+.doc-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.doc-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--doc-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--doc-surface-muted);
+}
+
+/* ── Quick Actions ──────────────────────────────────────── */
+.doc-quick-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ── Dashboard View ─────────────────────────────────────── */
+.doc-dashboard-view {
+  /* uses doc-content padding */
+}
+
+.doc-profile-view {
+  /* uses doc-content padding */
+}
+
+/* ── Prescription Slip ──────────────────────────────────── */
+.doc-prescription-slip {
+  background: #fff;
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius-lg);
+  padding: 32px;
+  box-shadow: var(--doc-shadow-sm);
+  position: relative;
+  font-family: var(--doc-font);
+}
+
+.doc-rx-header {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--doc-primary);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.doc-rx-symbol {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--doc-primary);
+  margin-right: 8px;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  :root { --doc-sidebar-w: 220px; }
+}
+
+@media (max-width: 900px) {
+  :root { --doc-sidebar-w: 68px; }
+
+  .doc-sidebar .doc-logo-text,
+  .doc-sidebar .doc-nav-label,
+  .doc-sidebar .doc-nav-badge,
+  .doc-sidebar .doc-sidebar-section-label,
+  .doc-sidebar-footer .doc-nav-item span:not(.doc-nav-icon) {
+    display: none;
+  }
+
+  .doc-sidebar-header {
+    justify-content: center;
+    padding: 14px 10px;
+  }
+
+  .doc-nav-item {
+    justify-content: center;
+    padding: 12px;
+  }
+
+  .doc-nav-item.active {
+    box-shadow: none;
+    border-left: none;
+  }
+
+  .doc-content {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .doc-layout {
+    flex-direction: column;
+  }
+
+  .doc-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .doc-sidebar-nav {
+    display: none;
+  }
+
+  .doc-sidebar-nav.mobile-open {
+    display: flex;
+  }
+
+  .doc-body, .doc-content {
+    padding: 16px;
+  }
+
+  .doc-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doc-form-group.full-width {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .doc-topnav {
+    padding: 0 14px;
+  }
+
+  .doc-content {
+    padding: 12px;
+  }
+
+  .doc-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .doc-quick-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* ── Welcome Banner ─────────────────────────────────────── */
+.doc-welcome-banner {
+  background: linear-gradient(135deg, #0e3d4f 0%, #0e9ab4 50%, #0d9488 100%);
+  border-radius: var(--doc-radius-xl);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 8px 24px rgba(14,154,180,0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.doc-welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.doc-welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60px; left: 30%;
+  width: 180px; height: 180px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.doc-welcome-text h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.doc-welcome-text p {
+  font-size: 13.5px;
+  margin: 0;
+  color: rgba(255,255,255,0.78);
+}
+
+.doc-welcome-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.doc-welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--doc-radius);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--doc-font);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.doc-welcome-btn-white {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(4px);
+}
+
+.doc-welcome-btn-white:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-1px);
+}
+
+.doc-welcome-btn-solid {
+  background: #fff;
+  color: var(--doc-primary-dark);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+}
+
+.doc-welcome-btn-solid:hover {
+  background: var(--doc-primary-subtle);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.18);
+}
+
+/* ── Pending Request Item ────────────────────────────────── */
+.doc-pending-item {
+  padding: 14px;
+  background: var(--doc-warning-bg);
+  border-radius: var(--doc-radius);
+  border: 1px solid var(--doc-warning-border);
+  margin-bottom: 10px;
+  transition: box-shadow 0.2s;
+}
+
+.doc-pending-item:last-child {
+  margin-bottom: 0;
+}
+
+.doc-pending-item:hover {
+  box-shadow: var(--doc-shadow-sm);
+}
+
+/* ── Consultation Item ──────────────────────────────────── */
+.doc-consult-item {
+  padding: 14px;
+  background: var(--doc-surface-muted);
+  border-radius: var(--doc-radius);
+  border: 1px solid var(--doc-border);
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.doc-consult-item:last-child {
+  margin-bottom: 0;
+}
+
+.doc-consult-item:hover {
+  background: var(--doc-primary-subtle);
+  border-color: var(--doc-primary-light);
+}
+
+/* ── Patient List Item ──────────────────────────────────── */
+.doc-patient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--doc-radius);
+  background: var(--doc-surface-muted);
+  border: 1px solid var(--doc-border);
+  margin-bottom: 8px;
+  transition: all 0.18s;
+}
+
+.doc-patient-item:last-child {
+  margin-bottom: 0;
+}
+
+.doc-patient-item:hover {
+  background: var(--doc-primary-subtle);
+  border-color: var(--doc-primary-light);
+  transform: translateX(2px);
+}
+
+/* ── Avatar Initials ────────────────────────────────────── */
+.doc-avatar-initial {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--doc-primary), var(--doc-teal));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* ========================================================
+   WIDA SYNTHCARE-STYLE DASHBOARD DESIGN SYSTEM
+   ======================================================== */
+
+.wida-dashboard-container {
+  padding: 20px 32px 48px 32px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0f172a;
+}
+
+/* ── Top Header Bar ──────────────────────────────────────── */
+.wida-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 20px;
+  width: 100%;
+}
+
+.wida-greeting-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.wida-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wida-search-wrapper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  width: 280px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.wida-search-wrapper:focus-within {
+  border-color: #007c77;
+  box-shadow: 0 0 0 3px rgba(0, 124, 119, 0.12);
+}
+
+.wida-search-icon {
+  font-size: 14px;
+  margin-right: 8px;
+  opacity: 0.6;
+}
+
+.wida-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 13.5px;
+  color: #1e293b;
+}
+
+.wida-header-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.wida-header-icon-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.wida-notif-dot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: 2px solid #ffffff;
+}
+
+.wida-avatar-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #e2e8f0;
+  transition: border-color 0.2s;
+}
+
+.wida-avatar-wrapper:hover {
+  border-color: #007c77;
+}
+
+.wida-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Main Layout Grid (Spacious, No Overlap) ─────────────── */
+.wida-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 370px);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1100px) {
+  .wida-main-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wida-col-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  width: 100%;
+}
+
+.wida-col-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ── Common Card Base ────────────────────────────────────── */
+.wida-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  padding: 22px;
+  transition: box-shadow 0.25s ease;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.wida-card:hover {
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.wida-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.wida-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.wida-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  user-select: none;
+}
+
+.wida-date-pill .arrow {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* ── History of Diagnosis (Dedicated Clear Space) ────────── */
+.wida-diagnosis-body {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.wida-anatomy-viewport {
+  position: relative;
+  background: #f8fafc;
+  border-radius: 16px;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  min-height: 360px;
+  flex: 0 0 200px;
+  width: 200px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.wida-anatomy-figure-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 190px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wida-anatomy-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 124, 119, 0.12));
+}
+
+/* Interactive Glowing Target Pins */
+.wida-target-pin {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.wida-target-pin.pin-heart {
+  top: 26%;
+  left: 50%;
+}
+
+.wida-target-pin.pin-kidney {
+  top: 44%;
+  left: 50%;
+}
+
+.wida-target-pin.pin-knee {
+  top: 73%;
+  left: 50%;
+}
+
+.wida-pin-pulse {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 124, 119, 0.4);
+  animation: wida-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.wida-pin-core {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #007c77;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 0 8px rgba(0, 124, 119, 0.9);
+}
+
+.wida-target-pin.active-pin .wida-pin-core {
+  background: #0d9488;
+  transform: scale(1.35);
+}
+
+.wida-pin-label {
+  display: none;
+}
+
+@keyframes wida-ping {
+  75%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.wida-anatomy-controls {
+  position: absolute;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.wida-ctrl-btn {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.wida-ctrl-btn:hover {
+  color: #007c77;
+  background: #f1f5f9;
+}
+
+.wida-ctrl-rotate {
+  font-size: 13px;
+  letter-spacing: -2px;
+}
+
+/* Diagnosis Cards List (Guaranteed inside container) */
+.wida-diagnosis-list {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.wida-diag-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 12px 14px;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.wida-diag-item:hover,
+.wida-diag-item.highlighted {
+  border-color: #007c77;
+  background: #f0fdfa;
+  box-shadow: 0 4px 14px rgba(0, 124, 119, 0.08);
+}
+
+.wida-diag-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.wida-diag-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.wida-diag-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wida-diag-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wida-diag-desc {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #64748b;
+  margin: 0 0 6px 0;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wida-doctor-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wida-doc-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.wida-doc-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wida-diag-scan-box {
+  width: 76px;
+  height: 72px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  background: #000;
+  cursor: zoom-in;
+  transition: transform 0.2s;
+}
+
+.wida-diag-scan-box:hover {
+  transform: scale(1.05);
+}
+
+.wida-scan-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Health Overview Card ────────────────────────────────── */
+.wida-organ-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.wida-organ-tab {
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 18px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wida-organ-tab:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.wida-organ-tab.active-tab {
+  background: #007c77;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 124, 119, 0.25);
+}
+
+.wida-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.wida-metric-item {
+  background: #ffffff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s;
+  min-width: 0;
+}
+
+.wida-metric-item:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.wida-metric-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.wida-metric-icon {
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wida-metric-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wida-metric-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.wida-status-pill {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.wida-status-pill.success {
+  background: #e6f7f4;
+  color: #007c77;
+}
+
+.wida-status-pill.warning {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.wida-metric-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+/* ── Your Prescriptions Card ─────────────────────────────── */
+.wida-rx-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.wida-rx-card {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.2s;
+  min-width: 0;
+}
+
+.wida-rx-card:hover {
+  background: #ffffff;
+  border-color: #007c77;
+  box-shadow: 0 4px 16px rgba(0, 124, 119, 0.08);
+}
+
+.wida-rx-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.wida-rx-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wida-rx-icon {
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wida-rx-icon.rx-purple {
+  background: #ede9fe;
+}
+
+.wida-rx-icon.rx-blue {
+  background: #e0f2fe;
+}
+
+.wida-rx-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.wida-rx-instruction {
+  font-size: 12px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.wida-rx-more-btn {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.wida-rx-timing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.wida-timing-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #475569;
+}
+
+.timing-dose {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* ── Upcoming Appointments Card ──────────────────────────── */
+.wida-calendar-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.wida-cal-day {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wida-cal-day:hover {
+  background: #f1f5f9;
+}
+
+.wida-cal-day.selected-day {
+  background: #007c77;
+  border-color: #007c77;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 124, 119, 0.28);
+}
+
+.day-number {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.day-name {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.wida-appointment-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wida-apt-row {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.2s;
+}
+
+.wida-apt-row:hover {
+  border-color: #007c77;
+  background: #ffffff;
+}
+
+.wida-apt-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wida-apt-subject {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.wida-join-btn {
+  background: #007c77;
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 124, 119, 0.2);
+}
+
+.wida-join-btn:hover {
+  background: #00635f;
+  transform: translateY(-1px);
+}
+
+.wida-apt-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wida-apt-doc-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.doc-avatar-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.doc-name-bold {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.doc-specialty-sub {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.wida-apt-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+/* ── AI Care Interactive Widget ──────────────────────────── */
+.wida-aicare-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aicare-loop-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e6f7f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wida-aicare-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #007c77;
+  margin: 0;
+}
+
+.wida-aicare-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aicare-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.wida-aicare-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  margin-bottom: 14px;
+  padding-right: 4px;
+}
+
+.wida-chat-msg {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid #edf2f7;
+}
+
+.wida-chat-msg.user {
+  background: #f0fdfa;
+  border-color: #ccfbf1;
+}
+
+.wida-msg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.wida-msg-author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-ai-ico {
+  color: #007c77;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.chat-author-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.wida-msg-action-icon {
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wida-msg-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0;
+}
+
+.wida-msg-image-wrap {
+  margin-top: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 120px;
+  cursor: zoom-in;
+  border: 1px solid #cbd5e1;
+}
+
+.wida-msg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wida-msg-attachment-bar {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.attachment-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.attachment-download-btn {
+  border: none;
+  background: #e2e8f0;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.wida-aicare-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 4px 6px 4px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.wida-mic-btn {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.wida-chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12.5px;
+  color: #1e293b;
+}
+
+.wida-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #007c77;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wida-send-btn:hover {
+  background: #00635f;
+  transform: scale(1.05);
+}
+
+/* ── WIDA Sidebar Design (No Ugly Scrollbar) ─────────────── */
+.wida-sidebar {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #eef2f6;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  padding: 18px 14px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.wida-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.wida-brand-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wida-brand-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #007c77;
+  letter-spacing: -0.02em;
+}
+
+.wida-brand-dot {
+  color: #0f172a;
+}
+
+.wida-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.wida-sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.wida-nav-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wida-nav-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+}
+
+.wida-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.wida-nav-link:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.wida-nav-link.active {
+  background: #e6f7f4;
+  color: #007c77;
+}
+
+.wida-nav-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wida-nav-txt {
+  flex: 1;
+}
+
+.wida-nav-arrow {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.wida-nav-badge-red {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 9999px;
+  padding: 1px 6px;
+}
+
+.wida-logout-link {
+  color: #ef4444 !important;
+}
+
+.wida-logout-link:hover {
+  background: #fef2f2 !important;
+}
+
+/* Bottom Promo Card */
+.wida-promo-card {
+  margin-top: auto;
+  background: linear-gradient(135deg, #024741 0%, #007065 100%);
+  border-radius: 14px;
+  padding: 14px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 112, 101, 0.25);
+}
+
+.wida-promo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.wida-promo-title {
+  font-size: 12.5px;
+  line-height: 1.35;
+  font-weight: 500;
+  margin: 0;
+}
+
+.wida-promo-title strong {
+  font-weight: 800;
+}
+
+.wida-promo-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #024741;
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wida-promo-btn:hover {
+  background: #f0fdfa;
+  transform: translateY(-1px);
+}
+
+/* ── Image Modal Overlay ─────────────────────────────────── */
+.wida-img-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.wida-img-modal-content {
+  background: #0f172a;
+  border-radius: 18px;
+  overflow: hidden;
+  max-width: 840px;
+  width: 100%;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.wida-img-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.wida-modal-scan-img {
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
+  object-fit: contain;
+  display: block;
+}
+
+.wida-img-modal-caption {
+  padding: 14px 20px;
+  color: #e2e8f0;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: #1e293b;
+  text-align: center;
+}
+
+/* ========================================================
+   WIDA DOCTOR PROFILE & CERTIFICATE PHOTO UPLOAD SYSTEM
+   ======================================================== */
+
+.wida-profile-full {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 32px 48px 32px;
+}
+
+.wida-profile-banner {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  padding: 24px;
+}
+
+.wida-avatar-column {
+  flex-shrink: 0;
+}
+
+.wida-avatar-image-container {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 3px solid #007c77;
+  box-shadow: 0 4px 16px rgba(0, 124, 119, 0.15);
+}
+
+.wida-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.wida-avatar-edit-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.wida-avatar-edit-badge:hover {
+  background: #007c77;
+}
+
+.wida-profile-info-main {
+  flex: 1;
+  min-width: 280px;
+}
+
+.wida-profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.wida-profile-name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.wida-profile-specialty {
+  font-size: 15.5px;
+  color: #007c77;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.wida-profile-subtext {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0 0 12px 0;
+}
+
+.wida-profile-bio {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.wida-profile-stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  min-width: 190px;
+}
+
+.wida-stat-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wida-stat-label {
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.wida-stat-val {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.wida-stat-val.primary-val {
+  color: #007c77;
+}
+
+.wida-stat-count {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Profile Grid: Left vs Right */
+.wida-profile-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.wida-profile-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.wida-profile-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.wida-info-table td {
+  padding: 10px 12px;
+  font-size: 13.5px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Badges list */
+.wida-badges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wida-badge-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.wida-badge-icon {
+  font-size: 26px;
+}
+
+.wida-badge-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.wida-badge-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Certificates Card & Gallery */
+.wida-certificates-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wida-cert-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wida-cert-item-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  transition: all 0.25s ease;
+}
+
+.wida-cert-item-card:hover {
+  border-color: #007c77;
+  box-shadow: 0 8px 24px rgba(0, 124, 119, 0.1);
+}
+
+.wida-cert-photo-wrapper {
+  position: relative;
+  background: #0f172a;
+  cursor: pointer;
+  overflow: hidden;
+  height: 100%;
+  min-height: 160px;
+}
+
+.wida-cert-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.wida-cert-photo-wrapper:hover .wida-cert-photo-img {
+  transform: scale(1.05);
+}
+
+.wida-cert-zoom-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 124, 119, 0.65);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.wida-cert-photo-wrapper:hover .wida-cert-zoom-overlay {
+  opacity: 1;
+}
+
+.wida-cert-meta {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wida-cert-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wida-cert-tag {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.wida-cert-verified-pill {
+  background: #e6f7f4;
+  color: #007c77;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.wida-cert-heading {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.wida-cert-issuer {
+  font-size: 13px;
+  color: #475569;
+}
+
+.wida-cert-details-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.cert-meta-label {
+  font-weight: 600;
+  color: #334155;
+}
+
+.wida-cert-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.wida-cert-btn-view {
+  background: #007c77;
+  color: #ffffff;
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wida-cert-btn-view:hover {
+  background: #00635f;
+}
+
+.wida-cert-btn-edit {
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wida-cert-btn-edit:hover {
+  background: #e2e8f0;
+}
+
+.wida-cert-btn-del {
+  background: transparent;
+  border: 1px solid #fecaca;
+  color: #ef4444;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wida-cert-btn-del:hover {
+  background: #fef2f2;
+}
+
+/* Modal Form Styles */
+.wida-modal-card-form {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.wida-modal-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.wida-modal-form-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.wida-modal-close-icon {
+  background: #f1f5f9;
+  border: none;
+  font-size: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.wida-cert-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.wida-cert-upload-dropzone {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 14px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.dropzone-preview {
+  width: 100px;
+  height: 75px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.dropzone-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropzone-action {
+  display: flex;
+  flex-direction: column;
+}
+
+.wida-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────── */
+@media (max-width: 1280px) {
+  .wida-main-layout {
+    grid-template-columns: 1fr;
+  }
+  .wida-profile-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .wida-diagnosis-body {
+    flex-direction: column;
+    align-items: center;
+  }
+  .wida-anatomy-viewport {
+    width: 100%;
+    flex: none;
+  }
+  .wida-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .wida-rx-grid {
+    grid-template-columns: 1fr;
+  }
+  .wida-cert-item-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+
