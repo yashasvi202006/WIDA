@@ -339,25 +339,7 @@ export const PatientModule: React.FC<PatientModuleProps> = ({
     addToast('info', 'Signed Out', 'You have been safely signed out from your WIDA account.');
   };
 
-  // Dedicated Login Screen
-  if (!isAuthenticated || currentTab === 'login') {
-    return (
-      <div id="patient-module" className="patient-shell" style={{ width: '100%', minHeight: '100vh', display: 'block' }}>
-        <PatientLogin
-          onLoginSuccess={(loggedInProfile) => {
-            if (loggedInProfile) setProfile(loggedInProfile);
-            setIsAuthenticated(true);
-            setCurrentTab('dashboard');
-            addToast('success', 'Welcome to WIDA', `Signed in as ${loggedInProfile?.name || profile.name}.`);
-          }}
-          onNavigateRegister={() => setCurrentTab('register')}
-        />
-        <NotificationToast toasts={toasts} onDismiss={removeToast} />
-      </div>
-    );
-  }
-
-  // Dedicated Register Screen
+  // Dedicated Register Screen (Checked before login so unauthenticated users can access registration)
   if (currentTab === 'register') {
     return (
       <div id="patient-module" className="patient-shell" style={{ width: '100%', minHeight: '100vh', display: 'block' }}>
@@ -369,7 +351,31 @@ export const PatientModule: React.FC<PatientModuleProps> = ({
             setCurrentTab('dashboard');
             addToast('success', 'ABHA Created & Verified', `Welcome to WIDA, ${newProf.name}! Your ABHA ID is ${newProf.abhaId}`);
           }}
-          onNavigateLogin={() => setCurrentTab('login')}
+          onNavigateLogin={() => {
+            setIsAuthenticated(false);
+            setCurrentTab('login');
+          }}
+        />
+        <NotificationToast toasts={toasts} onDismiss={removeToast} />
+      </div>
+    );
+  }
+
+  // Dedicated Login Screen
+  if (!isAuthenticated || currentTab === 'login') {
+    return (
+      <div id="patient-module" className="patient-shell" style={{ width: '100%', minHeight: '100vh', display: 'block' }}>
+        <PatientLogin
+          onLoginSuccess={(loggedInProfile) => {
+            if (loggedInProfile) setProfile(loggedInProfile);
+            setIsAuthenticated(true);
+            setCurrentTab('dashboard');
+            addToast('success', 'Welcome to WIDA', `Signed in as ${loggedInProfile?.name || profile.name}.`);
+          }}
+          onNavigateRegister={() => {
+            setIsAuthenticated(false);
+            setCurrentTab('register');
+          }}
         />
         <NotificationToast toasts={toasts} onDismiss={removeToast} />
       </div>

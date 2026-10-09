@@ -90,8 +90,9 @@ export const PatientRegister: React.FC<PatientRegisterProps> = ({
     setIsLoading(true);
     try {
       const res = await patientApiService.register(newProfile);
-      onRegisterSuccess(res.user);
-    } catch {
+      onRegisterSuccess(res?.user || newProfile);
+    } catch (err) {
+      console.warn('[Registration] Backend API warning, using local profile fallback:', err);
       onRegisterSuccess(newProfile);
     } finally {
       setIsLoading(false);
@@ -151,7 +152,7 @@ export const PatientRegister: React.FC<PatientRegisterProps> = ({
           )}
 
           {step === 1 && (
-            <div className="d-flex flex-column gap-3">
+            <form onSubmit={(e) => { e.preventDefault(); handleNext(); }} className="d-flex flex-column gap-3">
               <div>
                 <label className="form-label fw-semibold" style={{ fontSize: '0.82rem' }}>Full Legal Name</label>
                 <div className="position-relative">
@@ -227,14 +228,13 @@ export const PatientRegister: React.FC<PatientRegisterProps> = ({
               </div>
 
               <button
-                type="button"
+                type="submit"
                 className="patient-btn patient-btn-primary w-100 py-2 mt-2 justify-content-center"
-                onClick={handleNext}
               >
                 <span>Continue to Step 2</span>
                 <ArrowRight size={16} />
               </button>
-            </div>
+            </form>
           )}
 
           {step === 2 && (

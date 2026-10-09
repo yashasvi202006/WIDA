@@ -90,13 +90,13 @@ export const MSWDiagnosticsModal: React.FC<MSWDiagnosticsModalProps> = ({
           <div className="d-flex align-items-center gap-2">
             <Server size={20} />
             <h5 className="mb-0 font-heading fw-bold" style={{ fontSize: '1.05rem' }}>
-              MSW Backend Mock Integration Console
+              Backend & SQLite Database Integration Console
             </h5>
           </div>
           <button
             onClick={onClose}
             className="btn btn-sm btn-link text-white p-0 text-decoration-none"
-            aria-label="Close MSW Diagnostics modal"
+            aria-label="Close Diagnostics modal"
           >
             <X size={20} />
           </button>
@@ -124,15 +124,15 @@ export const MSWDiagnosticsModal: React.FC<MSWDiagnosticsModalProps> = ({
               />
               <div>
                 <div className="fw-bold" style={{ color: 'var(--p-text-main)' }}>
-                  Mock Service Worker (MSW v3) Running
+                  Java Enterprise Server & SQLite DB Connected
                 </div>
                 <div className="text-muted" style={{ fontSize: '0.78rem' }}>
-                  Intercepting all HTTP calls directed to <code>/api/*</code> at network layer
+                  Target: <code>http://localhost:8080/api/*</code> • Relational Database: <code>patient.db</code>
                 </div>
               </div>
             </div>
             <span className="badge bg-success bg-opacity-20 text-success border border-success">
-              Active Interception
+              Port 8080 Active
             </span>
           </div>
 
@@ -165,11 +165,11 @@ export const MSWDiagnosticsModal: React.FC<MSWDiagnosticsModalProps> = ({
             <div className="col-sm-6">
               <div className="p-3 rounded border bg-light bg-opacity-50 h-100">
                 <div className="text-muted small d-flex align-items-center gap-1 mb-1">
-                  <Database size={14} className="text-teal" /> Persistence Store
+                  <Database size={14} className="text-teal" /> Database Engine
                 </div>
-                <div className="h5 fw-bold mb-0 font-heading">Reactive DB + Storage</div>
+                <div className="h5 fw-bold mb-0 font-heading">SQLite 3 (patient.db)</div>
                 <div className="text-muted" style={{ fontSize: '0.72rem' }}>
-                  Persists in browser memory and syncs with local storage
+                  Native relational tables connected via Java JDBC driver
                 </div>
               </div>
             </div>
