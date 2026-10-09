@@ -635,36 +635,426 @@ public class DatabaseSeeder {
         GovernmentScheme gs1 = new GovernmentScheme();
         gs1.id = "sch-01";
         gs1.name = "Ayushman Bharat PM-JAY";
-        gs1.ministry = "Ministry of Health & Family Welfare";
+        gs1.shortName = "PM-JAY";
+        gs1.ministry = "National Health Authority & MoHFW";
+        gs1.category = "Hospital Care";
         gs1.coverage = "₹5,00,000 / family / year";
-        gs1.eligibility = "Eligible via ABHA ID verification";
+        gs1.coverageAmount = "₹5,00,000 per family/year";
+        gs1.eligibility = "Eligible via SECC criteria and ABHA ID";
         gs1.status = "Active & Linked";
         gs1.abhaLinked = true;
+        gs1.officialSource = "https://pmjay.gov.in";
         gs1.description = "World's largest government-funded healthcare assurance scheme for secondary and tertiary care hospitalization.";
+        gs1.tagline = "Cashless secondary and tertiary hospital care up to ₹5 Lakh per family per year.";
         gs1.benefits = Arrays.asList(
-                "Cashless hospitalization in 27,000+ empaneled hospitals across India",
-                "Covers 3 days pre-hospitalization and 15 days post-hospitalization expenses",
-                "Zero out-of-pocket expenses for critical procedures"
+                "Cashless hospitalization in 29,000+ empaneled hospitals across India",
+                "Covers 1,949 treatment packages including oncology, cardiac, and neurosurgery",
+                "Covers 3 days pre-hospitalization and 15 days post-hospitalization expenses"
         );
+        gs1.requiredDocuments = Arrays.asList("Aadhaar Card", "Ration Card", "PMJAY Family ID");
 
         GovernmentScheme gs2 = new GovernmentScheme();
         gs2.id = "sch-02";
         gs2.name = "ABHA (Ayushman Bharat Health Account)";
+        gs2.shortName = "ABHA";
         gs2.ministry = "National Health Authority (NHA)";
+        gs2.category = "Digital Health";
         gs2.coverage = "Digital Health ID & Unified EHR Integration";
+        gs2.coverageAmount = "Universal Digital Healthcare Account";
         gs2.eligibility = "All Indian Citizens";
         gs2.status = "Active & Verified";
         gs2.abhaLinked = true;
+        gs2.officialSource = "https://abdm.gov.in";
         gs2.description = "Unique 14-digit digital identity that digitally unifies your electronic health records across healthcare providers.";
+        gs2.tagline = "Store, access, and securely share digital health records across registered providers nationwide.";
         gs2.benefits = Arrays.asList(
                 "Paperless medical consultations and instant report sharing",
                 "Full patient data consent control and revocation rights",
                 "Compatible with NDHM (National Digital Health Mission)"
         );
+        gs2.requiredDocuments = Arrays.asList("Aadhaar Card or Driving License", "Mobile OTP");
+
+        GovernmentScheme gs3 = new GovernmentScheme();
+        gs3.id = "sch-03";
+        gs3.name = "Pradhan Mantri Bhartiya Janaushadhi Pariyojana (PMBJP)";
+        gs3.shortName = "Jan Aushadhi";
+        gs3.ministry = "Department of Pharmaceuticals";
+        gs3.category = "Affordable Medicines";
+        gs3.coverage = "50% to 90% Subsidized Generic Medicines";
+        gs3.coverageAmount = "Up to 90% discount on 1,965+ generic drugs & surgicals";
+        gs3.eligibility = "All Indian Citizens (No income limit)";
+        gs3.status = "Available";
+        gs3.abhaLinked = false;
+        gs3.officialSource = "https://janaushadhi.gov.in";
+        gs3.description = "Quality generic medicines at affordable prices through 10,000+ Jan Aushadhi Kendras.";
+        gs3.tagline = "Quality medicines for all at 50% to 90% lower prices than branded equivalents.";
+        gs3.benefits = Arrays.asList(
+                "High quality WHO-GMP compliant generic medicines",
+                "Suvidha biodegradable sanitary napkins at ₹1 per pad",
+                "Jan Aushadhi Sugam mobile app for outlet locator and medicine search"
+        );
+        gs3.requiredDocuments = Arrays.asList("Doctor Prescription (Rx)");
+
+        GovernmentScheme gs4 = new GovernmentScheme();
+        gs4.id = "sch-04";
+        gs4.name = "eSanjeevani - National Teleconsultation Service";
+        gs4.shortName = "eSanjeevani";
+        gs4.ministry = "MoHFW & C-DAC";
+        gs4.category = "Teleconsultation";
+        gs4.coverage = "100% Free Nationwide Doctor Video Consultations";
+        gs4.coverageAmount = "Free Online Doctor & Specialist Consultations";
+        gs4.eligibility = "All Indian Citizens with Internet Access";
+        gs4.status = "Available";
+        gs4.abhaLinked = true;
+        gs4.officialSource = "https://esanjeevani.mohfw.gov.in";
+        gs4.description = "National telemedicine service connecting patients directly to registered government physicians and specialists.";
+        gs4.tagline = "Free doctor video consultations from home with digital verifiable prescriptions.";
+        gs4.benefits = Arrays.asList(
+                "Direct real-time video consultation with medical specialists",
+                "Verifiable digitally signed e-Prescription delivered to phone",
+                "Zero travel expense or hospital waiting time"
+        );
+        gs4.requiredDocuments = Arrays.asList("Mobile Number for OTP", "Optional ABHA ID");
+
+        GovernmentScheme gs5 = new GovernmentScheme();
+        gs5.id = "sch-05";
+        gs5.name = "Pradhan Mantri Surakshit Matritva Abhiyan (PMSMA)";
+        gs5.shortName = "PMSMA";
+        gs5.ministry = "Ministry of Health & Family Welfare";
+        gs5.category = "Maternal & Child Health";
+        gs5.coverage = "Free Comprehensive Antenatal Care on 9th of Every Month";
+        gs5.coverageAmount = "100% Free Antenatal Consultations & Lab Tests";
+        gs5.eligibility = "All Pregnant Women in 2nd and 3rd Trimester";
+        gs5.status = "Available";
+        gs5.abhaLinked = false;
+        gs5.officialSource = "https://pmsma.mohfw.gov.in";
+        gs5.description = "Comprehensive and quality antenatal care provided free of cost to all pregnant women on the 9th of every month.";
+        gs5.tagline = "Assured, free antenatal checkup by specialists on the 9th day of each month.";
+        gs5.benefits = Arrays.asList(
+                "Free ultrasound, hemoglobin, and urine diagnostics",
+                "Specialist OB-GYN consultations at public health centres",
+                "Early identification and care for High-Risk Pregnancies (HRP)"
+        );
+        gs5.requiredDocuments = Arrays.asList("Mother & Child Protection (MCP) Card", "Aadhaar Card");
+
+        GovernmentScheme gs6 = new GovernmentScheme();
+        gs6.id = "sch-06";
+        gs6.name = "Janani Shishu Suraksha Karyakram (JSSK)";
+        gs6.shortName = "JSSK";
+        gs6.ministry = "National Health Mission (NHM)";
+        gs6.category = "Maternal & Child Health";
+        gs6.coverage = "Zero Out-of-Pocket Expenses for Delivery and Sick Infants";
+        gs6.coverageAmount = "100% Cashless Institutional Delivery & Sick Neonatal Care";
+        gs6.eligibility = "All Pregnant Women delivering in public health facilities and sick infants up to 1 year";
+        gs6.status = "Available";
+        gs6.abhaLinked = false;
+        gs6.officialSource = "https://nhm.gov.in";
+        gs6.description = "Entitles all pregnant women delivering in public institutions to absolutely free and zero out-of-pocket expenses.";
+        gs6.tagline = "Free delivery, C-sections, drugs, diagnostics, blood, and transport for mother and infant.";
+        gs6.benefits = Arrays.asList(
+                "Free normal and caesarean section institutional deliveries",
+                "Free diagnostics, drugs, consumables, and blood transfusions",
+                "Free transport from home to facility and drop-back home"
+        );
+        gs6.requiredDocuments = Arrays.asList("Identity Proof (Aadhaar / Voter ID)", "MCP Card");
+
+        GovernmentScheme gs7 = new GovernmentScheme();
+        gs7.id = "sch-07";
+        gs7.name = "Ni-kshay Poshan Yojana (NTEP)";
+        gs7.shortName = "Ni-kshay";
+        gs7.ministry = "Central TB Division, MoHFW";
+        gs7.category = "Chronic Disease & Nutrition";
+        gs7.coverage = "₹500/Month DBT Nutritional Support + 100% Free TB Treatment";
+        gs7.coverageAmount = "₹500 / month Direct Cash Assistance + Free Meds";
+        gs7.eligibility = "All notified Tuberculosis Patients on Ni-kshay Portal";
+        gs7.status = "Available";
+        gs7.abhaLinked = true;
+        gs7.officialSource = "https://nikshay.in";
+        gs7.description = "Direct Benefit Transfer scheme providing financial nutritional assistance and free anti-TB therapy.";
+        gs7.tagline = "Monthly financial nutrition support and comprehensive free diagnostic testing for TB patients.";
+        gs7.benefits = Arrays.asList(
+                "Direct ₹500/month bank transfer for the entire treatment course",
+                "Free fixed-dose combination anti-TB medications",
+                "Free GeneXpert / CBNAAT molecular testing"
+        );
+        gs7.requiredDocuments = Arrays.asList("Aadhaar Card", "Bank Account Details", "TB Notification ID");
+
+        GovernmentScheme gs8 = new GovernmentScheme();
+        gs8.id = "sch-08";
+        gs8.name = "Rashtriya Bal Swasthya Karyakram (RBSK)";
+        gs8.shortName = "RBSK";
+        gs8.ministry = "Ministry of Health & Family Welfare";
+        gs8.category = "Maternal & Child Health";
+        gs8.coverage = "Free Screening and Treatment for Children (0-18 Years)";
+        gs8.coverageAmount = "Free Screening, Surgeries & Early Intervention";
+        gs8.eligibility = "All Children aged 0 to 18 years in Anganwadis and Schools";
+        gs8.status = "Available";
+        gs8.abhaLinked = false;
+        gs8.officialSource = "https://rbsk.gov.in";
+        gs8.description = "Child health screening and early intervention services covering 4Ds: Defects, Diseases, Deficiencies, Delays.";
+        gs8.tagline = "Early child health screening and free surgical interventions from birth to 18 years.";
+        gs8.benefits = Arrays.asList(
+                "Free screening for 32 health conditions including congenital defects",
+                "Free tertiary surgical treatments (cardiac, cleft lip/palate, club foot)",
+                "Free assistive hearing devices and prescription spectacles"
+        );
+        gs8.requiredDocuments = Arrays.asList("School / Anganwadi ID or Birth Certificate", "Aadhaar Card");
+
+        GovernmentScheme gs9 = new GovernmentScheme();
+        gs9.id = "sch-09";
+        gs9.name = "Central Government Health Scheme (CGHS)";
+        gs9.shortName = "CGHS";
+        gs9.ministry = "Ministry of Health & Family Welfare";
+        gs9.category = "Employee & Pensioner Care";
+        gs9.coverage = "Comprehensive Healthcare for Central Employees & Pensioners";
+        gs9.coverageAmount = "Full Cashless Hospitalization & Subsidized Care";
+        gs9.eligibility = "Central Government Employees, Pensioners, and Dependents";
+        gs9.status = "Available";
+        gs9.abhaLinked = true;
+        gs9.officialSource = "https://cghs.nic.in";
+        gs9.description = "Comprehensive healthcare network for central government employees and pensioners across 80+ cities.";
+        gs9.tagline = "Comprehensive cashless health network for central civil servants and pensioners.";
+        gs9.benefits = Arrays.asList(
+                "Cashless inpatient care at empaneled private hospitals",
+                "Consultation across Allopathy, Ayurveda, Yoga, Unani, and Homeopathy",
+                "Subsidized plastic wellness cards with online booking"
+        );
+        gs9.requiredDocuments = Arrays.asList("CGHS Beneficiary Card", "PPO / Employee ID", "Aadhaar Card");
+
+        GovernmentScheme gs10 = new GovernmentScheme();
+        gs10.id = "sch-10";
+        gs10.name = "Employees' State Insurance Scheme (ESIC)";
+        gs10.shortName = "ESIC";
+        gs10.ministry = "Ministry of Labour and Employment";
+        gs10.category = "Employee & Pensioner Care";
+        gs10.coverage = "Full Medical Care + Cash Sickness & Maternity Benefits";
+        gs10.coverageAmount = "Complete Family Healthcare + Cash Wage Security";
+        gs10.eligibility = "Employees earning up to ₹21,000/month in covered establishments";
+        gs10.status = "Available";
+        gs10.abhaLinked = false;
+        gs10.officialSource = "https://www.esic.gov.in";
+        gs10.description = "Integrated social security and healthcare scheme protecting employees against sickness, maternity, and disablement.";
+        gs10.tagline = "Full medical care for family and cash sickness/maternity benefits for insured workers.";
+        gs10.benefits = Arrays.asList(
+                "Comprehensive medical care in ESIC dispensaries and model hospitals",
+                "70% daily wage cash benefit during certified sickness",
+                "100% wage maternity benefit for 26 weeks for female employees"
+        );
+        gs10.requiredDocuments = Arrays.asList("ESIC Pehchan Smart Card / IP Number", "Aadhaar Card", "Bank Account Details");
+
+        GovernmentScheme gs11 = new GovernmentScheme();
+        gs11.id = "sch-11";
+        gs11.name = "National Tele Mental Health Programme (Tele-MANAS)";
+        gs11.shortName = "Tele-MANAS";
+        gs11.ministry = "Ministry of Health and Family Welfare & NIMHANS";
+        gs11.category = "Mental Health";
+        gs11.coverage = "24x7 Nationwide Tele-Mental Health Counseling & Psychiatry";
+        gs11.coverageAmount = "100% Free 24x7 Counseling & Psychiatric Referral";
+        gs11.eligibility = "All Indian citizens experiencing distress, anxiety, or emotional health concerns";
+        gs11.status = "Available";
+        gs11.abhaLinked = true;
+        gs11.officialSource = "https://telemanas.mohfw.gov.in";
+        gs11.description = "24x7 free national tele-mental health helpline across all States & UTs in 20+ regional languages.";
+        gs11.tagline = "24x7 free national tele-mental health helpline and psychological counseling service across all States & UTs in 20+ regional languages.";
+        gs11.benefits = Arrays.asList(
+                "Immediate connection to certified clinical psychologists via toll-free 14416 / 1800-891-4416",
+                "Tiered referral to NIMHANS and regional tertiary mental health institutes",
+                "Confidential digital follow-ups and e-prescriptions in 20+ scheduled Indian languages"
+        );
+        gs11.requiredDocuments = Arrays.asList("No documentation required - Instant, anonymous dial-in service");
+
+        GovernmentScheme gs12 = new GovernmentScheme();
+        gs12.id = "sch-12";
+        gs12.name = "National Policy for Rare Diseases (NPRD) & Rare Diseases Portal";
+        gs12.shortName = "NPRD Rare Disease Support";
+        gs12.ministry = "Ministry of Health and Family Welfare";
+        gs12.category = "Specialized & Rare Diseases";
+        gs12.coverage = "Financial assistance up to ₹50 Lakh for rare genetic disorders";
+        gs12.coverageAmount = "Up to ₹50,00,000 per patient (One-time grant)";
+        gs12.eligibility = "Patients diagnosed with rare diseases treated at notified Centers of Excellence (CoEs)";
+        gs12.status = "Available";
+        gs12.abhaLinked = true;
+        gs12.officialSource = "https://rarediseases.mohfw.gov.in";
+        gs12.description = "One-time financial grant up to ₹50 Lakh for enzyme replacement therapies and rare disease management.";
+        gs12.tagline = "Financial support up to ₹50 Lakh per patient for life-saving treatment of rare disorders at designated Centers of Excellence.";
+        gs12.benefits = Arrays.asList(
+                "Direct financial assistance up to ₹50 Lakh for high-cost enzyme replacement therapies",
+                "National crowdfunding portal linking verified cases with CSR donors",
+                "Access to specialized rare disease clinical boards across 12 apex medical centers"
+        );
+        gs12.requiredDocuments = Arrays.asList("Diagnostic Genetic / Biochemical Report from CoE", "Aadhaar Card", "Treating Physician Recommendation Form");
+
+        GovernmentScheme gs13 = new GovernmentScheme();
+        gs13.id = "sch-13";
+        gs13.name = "Pradhan Mantri National Dialysis Programme (PMNDP)";
+        gs13.shortName = "PMNDP Dialysis";
+        gs13.ministry = "National Health Mission (NHM), MoHFW";
+        gs13.category = "Chronic Disease & Critical Care";
+        gs13.coverage = "100% Free Hemodialysis and Peritoneal Dialysis for BPL patients";
+        gs13.coverageAmount = "100% Free Dialysis for BPL Patients / Subsidized for Non-BPL";
+        gs13.eligibility = "End-Stage Renal Disease (ESRD) and chronic kidney failure patients";
+        gs13.status = "Available";
+        gs13.abhaLinked = true;
+        gs13.officialSource = "https://pmndp.mohfw.gov.in";
+        gs13.description = "100% free hemodialysis and peritoneal dialysis in all District Hospitals under One Nation-One Dialysis.";
+        gs13.tagline = "100% free hemodialysis and peritoneal dialysis in all District Hospitals nationwide under One Nation-One Dialysis portability.";
+        gs13.benefits = Arrays.asList(
+                "100% cashless hemodialysis sessions including dialyzers, tubing, and heparin",
+                "Support for Automated and Peritoneal Dialysis (CAPD) for home management",
+                "National renal registry with One Nation-One Dialysis portability across all States"
+        );
+        gs13.requiredDocuments = Arrays.asList("Nephrologist Prescription / ESRD Diagnosis", "BPL Ration Card or Income Certificate", "Aadhaar Card", "ABHA ID");
+
+        GovernmentScheme gs14 = new GovernmentScheme();
+        gs14.id = "sch-14";
+        gs14.name = "U-WIN Digital Platform & Universal Immunization Programme (UIP)";
+        gs14.shortName = "U-WIN Vaccination";
+        gs14.ministry = "Ministry of Health and Family Welfare";
+        gs14.category = "Maternal & Child Health";
+        gs14.coverage = "Nationwide digital immunization registry and universal vaccination";
+        gs14.coverageAmount = "100% Free Complete National Immunization Schedule";
+        gs14.eligibility = "All pregnant women and children from birth up to 5 years (and catch-up to 16)";
+        gs14.status = "Available";
+        gs14.abhaLinked = true;
+        gs14.officialSource = "https://uwin.mohfw.gov.in";
+        gs14.description = "Universal digital tracking and verifiable vaccination certificates for 12 preventable diseases.";
+        gs14.tagline = "Universal digital immunization registry and vaccination tracking for pregnant mothers and all children from birth to age 5.";
+        gs14.benefits = Arrays.asList(
+                "100% free vaccination against 12 preventable diseases (Polio, Measles-Rubella, Hepatitis B, PCV, etc.)",
+                "Instant QR-coded digital vaccination certificates linked directly to ABHA ID",
+                "Automated SMS reminders for upcoming vaccine milestones and slot bookings"
+        );
+        gs14.requiredDocuments = Arrays.asList("Parent/Guardian Mobile Number", "Aadhaar Card of Parent", "Child Birth Certificate or MCP Card");
+
+        GovernmentScheme gs15 = new GovernmentScheme();
+        gs15.id = "sch-15";
+        gs15.name = "Rashtriya Arogya Nidhi (RAN) & Health Minister’s Cancer Patient Fund";
+        gs15.shortName = "Rashtriya Arogya Nidhi";
+        gs15.ministry = "Ministry of Health and Family Welfare";
+        gs15.category = "Hospital Care";
+        gs15.coverage = "One-time financial assistance up to ₹15 Lakh for BPL patients";
+        gs15.coverageAmount = "Up to ₹15,00,000 Direct Financial Assistance";
+        gs15.eligibility = "BPL patients receiving treatment for life-threatening diseases in designated government hospitals";
+        gs15.status = "Available";
+        gs15.abhaLinked = true;
+        gs15.officialSource = "https://mohfw.gov.in/schemes/schemes-programmes/rashtriya-arogya-nidhi";
+        gs15.description = "Direct financial assistance up to ₹15 Lakh for oncology, cardiac surgery, and transplants.";
+        gs15.tagline = "Direct financial aid up to ₹15 Lakh for BPL patients battling life-threatening illnesses and cancer in government superspecialty hospitals.";
+        gs15.benefits = Arrays.asList(
+                "Direct fund transfer to hospital revolving fund for oncology and organ transplants",
+                "Health Minister’s Cancer Patient Fund providing up to ₹5 Lakh for specialized drugs",
+                "Emergency fast-track approval via the Medical Superintendent of the treating institute"
+        );
+        gs15.requiredDocuments = Arrays.asList("Application Form endorsed by Medical Superintendent", "BPL Ration Card / Income Certificate", "Aadhaar Card", "Diagnostic Reports");
+
+        GovernmentScheme gs16 = new GovernmentScheme();
+        gs16.id = "sch-16";
+        gs16.name = "National Sickle Cell Anemia Elimination Mission (NSCAEM)";
+        gs16.shortName = "Sickle Cell Mission";
+        gs16.ministry = "Ministry of Health and Family Welfare & Ministry of Tribal Affairs";
+        gs16.category = "Chronic Disease & Critical Care";
+        gs16.coverage = "Universal screening of 7 Crore citizens with genetic status cards";
+        gs16.coverageAmount = "100% Free Screening, Counseling, & Disease Management";
+        gs16.eligibility = "Individuals aged 0-40 years in 17 high-prevalence States (tribal & vulnerable groups)";
+        gs16.status = "Available";
+        gs16.abhaLinked = true;
+        gs16.officialSource = "https://sickle.nhm.gov.in";
+        gs16.description = "Universal screening and color-coded cards to eliminate sickle cell disease by 2047.";
+        gs16.tagline = "Mission to eliminate Sickle Cell Disease by 2047: universal screening of 7 Crore citizens with color-coded genetic status cards.";
+        gs16.benefits = Arrays.asList(
+                "Free point-of-care solubility testing and confirmatory HPLC electrophoresis diagnosis",
+                "Official color-coded Sickle Cell Status Cards (Trait / Disease / Normal) linked to ABHA ID",
+                "Lifelong free supply of Hydroxyurea, Folic Acid, and pneumococcal prophylaxis vaccines"
+        );
+        gs16.requiredDocuments = Arrays.asList("Aadhaar Card", "ABHA Number");
+
+        GovernmentScheme gs17 = new GovernmentScheme();
+        gs17.id = "sch-17";
+        gs17.name = "National Programme for Prevention & Control of NCDs (NP-NCD)";
+        gs17.shortName = "NP-NCD Screening";
+        gs17.ministry = "National Health Systems Resource Centre (NHSRC), MoHFW";
+        gs17.category = "Chronic Disease & Critical Care";
+        gs17.coverage = "Universal screening and free lifelong treatment for Hypertension, Diabetes, and Cancers";
+        gs17.coverageAmount = "100% Free Universal Health Screening & NCD Medications";
+        gs17.eligibility = "All Indian citizens aged 30 years and older";
+        gs17.status = "Available";
+        gs17.abhaLinked = true;
+        gs17.officialSource = "https://ncd.nhm.gov.in";
+        gs17.description = "Population-based screening for hypertension, diabetes, oral, breast, and cervical cancers.";
+        gs17.tagline = "Universal screening and free lifelong treatment for Hypertension, Diabetes, and Oral, Breast, and Cervical cancers.";
+        gs17.benefits = Arrays.asList(
+                "Annual non-communicable disease risk assessment (CBAC) by frontline healthcare workers",
+                "Free blood pressure and blood sugar tests with digital longitudinal tracking on the NCD portal",
+                "Free screening for oral, breast, and cervical cancers and free essential chronic medications"
+        );
+        gs17.requiredDocuments = Arrays.asList("Aadhaar Card or Mobile Number", "ABHA ID");
+
+        GovernmentScheme gs18 = new GovernmentScheme();
+        gs18.id = "sch-18";
+        gs18.name = "National Organ and Tissue Transplant Organisation (NOTTO)";
+        gs18.shortName = "NOTTO Organ Registry";
+        gs18.ministry = "Directorate General of Health Services (DGHS), MoHFW";
+        gs18.category = "Critical Care & Organ Donation";
+        gs18.coverage = "Apex national registry for organ allocation and donor pledge cards";
+        gs18.coverageAmount = "Universal National Organ Allocation & Donor Registry";
+        gs18.eligibility = "Citizens aged 18+ pledging organ donation and registered transplant recipients";
+        gs18.status = "Available";
+        gs18.abhaLinked = true;
+        gs18.officialSource = "https://notto.mohfw.gov.in";
+        gs18.description = "Apex national registry for organ allocation transparency and instant donor pledge cards.";
+        gs18.tagline = "Apex national registry for deceased & living organ donation, transparent waitlists, and instant donor pledge cards.";
+        gs18.benefits = Arrays.asList(
+                "Instant issuance of official Government of India Organ Donor Pledge Card linked with ABHA ID",
+                "Transparent computerized national waiting list and organ allocation protocol under the THOTA Act",
+                "24x7 National Organ Transplant Toll-Free Helpline: 1800-11-4770"
+        );
+        gs18.requiredDocuments = Arrays.asList("Aadhaar Card", "Active Mobile Number for OTP", "Two Next-of-Kin Contact Details");
+
+        GovernmentScheme gs19 = new GovernmentScheme();
+        gs19.id = "sch-19";
+        gs19.name = "National Viral Hepatitis Control Program (NVHCP)";
+        gs19.shortName = "NVHCP Hepatitis Care";
+        gs19.ministry = "National Health Mission (NHM), MoHFW";
+        gs19.category = "Chronic Disease & Critical Care";
+        gs19.coverage = "100% free viral load testing and curative treatment for Hepatitis B & C";
+        gs19.coverageAmount = "100% Free Diagnostics & Curative Treatment Regimens";
+        gs19.eligibility = "All citizens diagnosed with or suspected of having Hepatitis B or Hepatitis C";
+        gs19.status = "Available";
+        gs19.abhaLinked = true;
+        gs19.officialSource = "https://nvhcp.mohfw.gov.in";
+        gs19.description = "100% free viral load testing and curative oral DAA therapy for Hepatitis C and management for Hepatitis B.";
+        gs19.tagline = "100% free viral load testing and curative oral therapy for Hepatitis C and lifelong management for Hepatitis B across India.";
+        gs19.benefits = Arrays.asList(
+                "Free molecular testing (quantitative HCV RNA & HBV DNA viral load assays)",
+                "100% free 12-week curative Direct-Acting Antiviral (DAA) treatment regimen for Hepatitis C",
+                "Lifelong free antiviral therapy for chronic Hepatitis B patients and toll-free helpline: 1800-11-6666"
+        );
+        gs19.requiredDocuments = Arrays.asList("Photo ID (Aadhaar or Voter ID)", "Prescription / Screening Report from Government Hospital");
+
+        GovernmentScheme gs20 = new GovernmentScheme();
+        gs20.id = "sch-20";
+        gs20.name = "Pradhan Mantri Ayushman Bharat Health Infrastructure Mission (PM-ABHIM)";
+        gs20.shortName = "PM-ABHIM Infrastructure";
+        gs20.ministry = "Ministry of Health and Family Welfare";
+        gs20.category = "Healthcare Infrastructure";
+        gs20.coverage = "₹64,180 Crore Pan-India public healthcare infrastructure modernisation";
+        gs20.coverageAmount = "₹64,180 Crore Nationwide Health Infrastructure Outlay";
+        gs20.eligibility = "Universal public healthcare infrastructure catering to all citizens";
+        gs20.status = "Available";
+        gs20.abhaLinked = true;
+        gs20.officialSource = "https://pmabhim.mohfw.gov.in";
+        gs20.description = "Pan-India mission establishing Critical Care Hospital Blocks and Integrated Public Health Labs across every district.";
+        gs20.tagline = "₹64,180 Crore national health mission establishing 24x7 Critical Care Hospital Blocks and Integrated Public Health Labs across every district.";
+        gs20.benefits = Arrays.asList(
+                "Establishing 50/100-bedded 24x7 Critical Care Hospital Blocks in all 730 districts for ICU preparedness",
+                "Integrated Public Health Labs (IPHL) in all districts for rapid diagnostics and surveillance",
+                "Modern biosafety level labs (BSL-3) and National Institutes for One Health"
+        );
+        gs20.requiredDocuments = Arrays.asList("Public Infrastructure Scheme - No individual registration needed");
 
         String sql = "INSERT OR REPLACE INTO government_schemes (id, name, status, data) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            for (GovernmentScheme gs : Arrays.asList(gs1, gs2)) {
+            for (GovernmentScheme gs : Arrays.asList(gs1, gs2, gs3, gs4, gs5, gs6, gs7, gs8, gs9, gs10, gs11, gs12, gs13, gs14, gs15, gs16, gs17, gs18, gs19, gs20)) {
                 stmt.setString(1, gs.id);
                 stmt.setString(2, gs.name);
                 stmt.setString(3, gs.status);

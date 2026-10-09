@@ -559,7 +559,7 @@ public class DatabaseManager {
 
     // --- Emergency SOS ---
     public EmergencyRequest getActiveEmergency() {
-        String sql = "SELECT data FROM emergency_requests WHERE status NOT IN ('Arrived', 'Resolved', 'Cancelled') ORDER BY timestamp DESC LIMIT 1";
+        String sql = "SELECT data FROM emergency_requests WHERE status NOT IN ('Arrived', 'Resolved', 'Cancelled', 'Deactivated') ORDER BY timestamp DESC LIMIT 1";
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
                 return JsonUtil.fromJson(rs.getString("data"), EmergencyRequest.class);
@@ -607,6 +607,18 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean deactivateEmergency(String id) {
+        String sql = "UPDATE emergency_requests SET status = 'Deactivated' WHERE id = ?";
+        try (Connection conn = getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, id);
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // --- Notifications ---
