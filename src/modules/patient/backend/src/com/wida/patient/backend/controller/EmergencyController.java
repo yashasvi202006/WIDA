@@ -72,6 +72,14 @@ public class EmergencyController extends BaseController {
             return;
         }
 
+        if (path.contains("/emergency/") && path.endsWith("/deactivate") && "POST".equalsIgnoreCase(method)) {
+            String sub = path.substring(path.indexOf("/emergency/") + "/emergency/".length());
+            String id = sub.substring(0, sub.indexOf("/deactivate"));
+            boolean ok = DatabaseManager.getInstance().deactivateEmergency(id);
+            sendJson(exchange, 200, Map.of("success", ok, "message", "Emergency SOS deactivated"));
+            return;
+        }
+
         sendJson(exchange, 404, Map.of("error", "Emergency route not found: " + path));
     }
 }
