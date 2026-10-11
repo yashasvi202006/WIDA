@@ -45,24 +45,25 @@ export const TopNav = ({ activeSectionTitle, user, lab, onRoleSwitch, onSimulate
                     </div>
                 )}
 
-                {/* Role Switcher for Testing RBAC Permissions */}
-                {onRoleSwitch && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                        <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--lab-text-secondary)' }}>Role:</span>
-                        <select
-                            className="lab-select"
-                            value={user?.role}
-                            onChange={(e) => onRoleSwitch(e.target.value)}
-                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem', height: '32px', width: 'auto' }}
-                            title="Test different clinical security roles"
-                        >
-                            <option value="LAB_DIRECTOR">Lab Director (Full Admin)</option>
-                            <option value="PATHOLOGIST">Pathologist (Verification Signatory)</option>
-                            <option value="TECHNICIAN">Technician (Results Entry Only)</option>
-                            <option value="PHLEBOTOMIST">Phlebotomist (Sample Collector)</option>
-                        </select>
-                    </div>
-                )}
+                {/* Registered NABL / Clinical Establishment ID */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'var(--lab-surface-muted)',
+                    border: '1px solid var(--lab-border)',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    fontSize: '0.74rem',
+                    fontWeight: 600,
+                    color: 'var(--lab-text-secondary)'
+                }}>
+                    <span style={{ fontSize: '0.82rem' }}>🆔</span>
+                    <span>License:</span>
+                    <strong style={{ color: 'var(--lab-primary-dark)', letterSpacing: '0.3px' }}>
+                        {lab?.license_number || user?.registeredId || 'NABL-ISO-48291'}
+                    </strong>
+                </div>
 
                 {/* User Profile Pill */}
                 <div className="lab-user-pill">

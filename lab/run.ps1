@@ -21,5 +21,6 @@ $BackendProcess = Start-Process -FilePath "node" -ArgumentList "lab/backend/serv
 Write-Host "`n[3/3] Starting Vite Frontend on http://127.0.0.1:5176..." -ForegroundColor Green
 Write-Host "Opening Lab Workspace in default browser..." -ForegroundColor Green
 
-Start-Process "http://127.0.0.1:5176"
-npx vite --config lab/vite.config.js
+Start-Process "http://localhost:5176"
+npx vite --config lab/vite.config.js --host 0.0.0.0
+

@@ -11,7 +11,7 @@ import { hashPassword, verifyPassword, generateToken } from './utils/cryptoUtil.
 import { authenticate, authorizeRole } from './middleware/authMiddleware.js';
 
 const PORT = parseInt(process.env.LAB_PORT || '8082', 10);
-const HOST = process.env.LAB_HOST || '127.0.0.1';
+const HOST = process.env.LAB_HOST || '0.0.0.0';
 
 // ---------- Request Helper Utilities ----------
 
