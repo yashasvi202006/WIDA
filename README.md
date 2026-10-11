@@ -19,9 +19,21 @@
 4. [Module-by-Module Showcase & Screenshots](#-module-by-module-showcase--screenshots)
    - [4.1 Unified Authentication Gateway (`WIDA Auth`)](#41-unified-authentication-gateway-wida-auth)
    - [4.2 Patient Healthcare Portal (`WIDA.health`)](#42-patient-healthcare-portal-widahealth)
+     - [4.2.1 Dashboard & Clinical Overview](#421-patient-dashboard--clinical-overview)
+     - [4.2.2 Specialist Directory & Booking](#422-find--book-certified-medical-specialists)
+     - [4.2.3 Longitudinal Health Records Vault](#423-longitudinal-health-records--care-journey)
+     - [4.2.4 Active Prescriptions & Dispensing](#424-active-prescriptions--pharmacy-orders)
    - [4.3 Doctor Clinical Workspace (`WIDA.doc`)](#43-doctor-clinical-workspace-widadoc)
+     - [4.3.1 Dashboard & 3D Anatomy Model](#431-clinical-dashboard-with-interactive-3d-anatomy-model)
+     - [4.3.2 Appointments Queue & Triage](#432-appointments-queue--patient-triage-management)
+     - [4.3.3 Consultations & Encounter Notes](#433-clinical-consultations--patient-case-records)
+     - [4.3.4 Electronic Prescription Builder](#434-electronic-prescription-builder)
+     - [4.3.5 Practitioner Licensing Profile](#435-practitioner-credential-vault--licensing-profile)
    - [4.4 Diagnostic Pathology Laboratory (`WIDA.lab`)](#44-diagnostic-pathology-laboratory-widalab)
+     - [4.4.1 LIMS Accessioning & Specimen Workflow](#441-lims-accessioning--specimen-workflow-management)
+     - [4.4.2 Diagnostic Test Catalogue & Health Packages](#442-diagnostic-test-catalogue--comprehensive-health-checkup-packages)
    - [4.5 Central Pharmacy & Medication Dispensation (`WIDA.pharmacy`)](#45-central-pharmacy--medication-dispensation-widapharmacy)
+     - [4.5.1 Real-Time Prescription Dispensation Queue](#451-real-time-prescription-dispensation-queue)
 5. [Academic Research Paper (Format)](#-academic-research-paper)
    - [Abstract & Problem Statement](#abstract)
    - [Architectural Paradigm & Standards Compliance](#architectural-paradigm--standards-compliance)
@@ -116,7 +128,20 @@ The Unified Gateway serves as the centralized authorization clearinghouse. Users
 ### 4.2 Patient Healthcare Portal (`WIDA.health`)
 The Patient Portal is an ABHA-compliant personal health records (PHR) hub. It aggregates upcoming visits, medication schedules, emergency SOS alerts, and historical diagnostic scans into an intuitive dashboard.
 
+#### 4.2.1 Patient Dashboard & Clinical Overview
 ![Patient Portal Dashboard](docs/screenshots/02_patient_portal_dashboard.png)
+
+#### 4.2.2 Find & Book Certified Medical Specialists
+Patients can search by clinical specialty, hospital, or medicine system (Allopathy, Ayurveda, and Homeopathy), review practitioner verification badges, and schedule teleconsultation slots.
+![Find and Book Doctors](docs/screenshots/08_patient_find_doctors.png)
+
+#### 4.2.3 Longitudinal Health Records & Care Journey
+Chronological timeline of all clinical interactions, discharge summaries, laboratory reports, and practitioner notes.
+![Unified Health Records](docs/screenshots/09_patient_health_records.png)
+
+#### 4.2.4 Active Prescriptions & Pharmacy Orders
+Direct view of all doctor-issued electronic prescriptions with dosage regimens, duration, and 1-click ordering to the Central Pharmacy.
+![Patient Prescriptions](docs/screenshots/10_patient_prescriptions.png)
 
 *Key Highlights:*
 - **Longitudinal Care Journey**: Chronological timeline of clinical consultations, hospital admissions, and laboratory diagnostics.
@@ -129,7 +154,25 @@ The Patient Portal is an ABHA-compliant personal health records (PHR) hub. It ag
 ### 4.3 Doctor Clinical Workspace (`WIDA.doc`)
 Designed for medical specialists, the Doctor Workspace opens directly onto the **Clinical Dashboard**. It combines appointment queues, patient case files, teleconsultation tools, and an interactive 3D anatomical model.
 
+#### 4.3.1 Clinical Dashboard with Interactive 3D Anatomy Model
+Interactive, rotatable, and zoomable anatomical model with target pins highlighting organ-specific diagnosis histories (Cardiology, Nephrology, Orthopedics).
 ![Doctor Clinical Dashboard](docs/screenshots/03_doctor_clinical_dashboard.png)
+
+#### 4.3.2 Appointments Queue & Patient Triage Management
+Real-time schedule manager with instant action controls to accept, decline, or initiate teleconsultations for incoming appointments.
+![Doctor Appointments Queue](docs/screenshots/11_doctor_appointments_queue.png)
+
+#### 4.3.3 Clinical Consultations & Patient Case Records
+Comprehensive consultation log detailing diagnosis codes, patient medical histories, clinical observations, and follow-up schedules.
+![Doctor Clinical Consultations](docs/screenshots/12_doctor_teleconsultations.png)
+
+#### 4.3.4 Electronic Prescription Builder
+Clinical prescription engine for rapid medicine formulation, dosage scheduling, meal instructions, and pharmacy dispatch.
+![Doctor Prescription Builder](docs/screenshots/13_doctor_prescription_builder.png)
+
+#### 4.3.5 Practitioner Credential Vault & Licensing Profile
+Verified credentials, registration numbers (MCI/NMC), consultation fee policies, and practice certifications.
+![Doctor Practitioner Profile](docs/screenshots/04_doctor_practitioner_profile.png)
 
 *Key Highlights:*
 - **Interactive 3D Anatomical Body Model**: Rotatable, zoomable human model with pulsing target pins focusing on cardiac, renal, and joint pathologies.
@@ -137,14 +180,18 @@ Designed for medical specialists, the Doctor Workspace opens directly onto the *
 - **Practitioner Credential Vault**: Verified license display with MCI/NMC verification badges and certificate upload capabilities.
 - **Electronic Prescription Writer**: Automated dosage calculations, pharmaceutical interaction alerts, and direct transmission to pharmacy queues.
 
-![Doctor Practitioner Profile](docs/screenshots/04_doctor_practitioner_profile.png)
-
 ---
 
 ### 4.4 Diagnostic Pathology Laboratory (`WIDA.lab`)
 The Diagnostic Laboratory module is an end-to-end Laboratory Information Management System (LIMS) adhering to **NABL ISO 15189:2022**. It governs the full specimen lifecycle from phlebotomy collection to multi-signature report publishing.
 
+#### 4.4.1 LIMS Accessioning & Specimen Workflow Management
+Real-time tracking of diagnostic accessions, tube color coding, analyzer telemetry, and automated audit trails.
 ![Diagnostic Pathology Laboratory](docs/screenshots/05_diagnostic_laboratory_portal.png)
+
+#### 4.4.2 Diagnostic Test Catalogue & Comprehensive Health Checkup Packages
+Directory of diagnostic investigations with physiological units, specimen container guidelines, and multi-test wellness profiles.
+![Lab Test Catalogue](docs/screenshots/06_lab_test_catalogue.png)
 
 *Key Highlights:*
 - **4-Stage Sample State Machine**: `REGISTERED` → `ACCESSIONED` → `SAMPLE_COLLECTED` → `UNDER_ANALYSIS` → `REPORT_READY` → `VERIFIED` → `DISPATCHED`.
@@ -152,13 +199,13 @@ The Diagnostic Laboratory module is an end-to-end Laboratory Information Managem
 - **Dual-Authorization Verification Lock**: Technicians are cryptographically blocked from publishing reports; only accredited Pathologists (`MD Path`) or Lab Directors can sign off.
 - **Audit-Logged Amendments**: Versioned report corrections (`v1` → `v2`) logging amendment reasons without overwriting prior medical baselines.
 
-![Lab Test Catalogue](docs/screenshots/06_lab_test_catalogue.png)
-
 ---
 
 ### 4.5 Central Pharmacy & Medication Dispensation (`WIDA.pharmacy`)
 The Central Pharmacy module links doctor e-prescriptions directly with hospital inventory. Pharmacists review prescribed molecules, verify dosage guidelines, and manage patient dispensing queues.
 
+#### 4.5.1 Real-Time Prescription Dispensation Queue
+Live queue synchronizing digital prescriptions from the Doctor Module with hospital stock availability and packaging verification.
 ![Central Pharmacy Dispensation](docs/screenshots/07_central_pharmacy_dispensation.png)
 
 *Key Highlights:*
