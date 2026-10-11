@@ -2,9 +2,33 @@ import React, { useState } from 'react';
 import { PATIENT_MOCK_DOCUMENTS } from '../data/patientMockData';
 import { FolderLock, Upload, FileText, Download, Trash2 } from 'lucide-react';
 export const PatientMedicalVault = () => {
-    const [documents, setDocuments] = useState(PATIENT_MOCK_DOCUMENTS);
+    const [documents, setDocuments] = useState(() => {
+        try {
+            const stored = JSON.parse(localStorage.getItem('wida_patient_vault_documents') || '[]');
+            if (stored.length > 0) {
+                const ids = new Set(stored.map(d => d.id));
+                return [...stored, ...PATIENT_MOCK_DOCUMENTS.filter(d => !ids.has(d.id))];
+            }
+        } catch {}
+        return PATIENT_MOCK_DOCUMENTS;
+    });
     const [categoryFilter, setCategoryFilter] = useState('All');
     const [uploadSuccess, setUploadSuccess] = useState(false);
+
+    React.useEffect(() => {
+        const handlePrescriptionCreated = () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem('wida_patient_vault_documents') || '[]');
+                if (stored.length > 0) {
+                    const ids = new Set(stored.map(d => d.id));
+                    setDocuments([...stored, ...PATIENT_MOCK_DOCUMENTS.filter(d => !ids.has(d.id))]);
+                }
+            } catch {}
+        };
+        window.addEventListener('wida:prescription-created', handlePrescriptionCreated);
+        return () => window.removeEventListener('wida:prescription-created', handlePrescriptionCreated);
+    }, []);
+
     const categories = ['All', 'Medical Reports', 'Vaccination', 'Insurance', 'Prescriptions'];
     const filtered = documents.filter((d) => (categoryFilter === 'All' ? true : d.category === categoryFilter));
     const handleSimulateUpload = () => {
@@ -18,12 +42,20 @@ export const PatientMedicalVault = () => {
             sharingStatus: 'Shared with Doctors',
             fileType: 'pdf'
         };
-        setDocuments([newDoc, ...documents]);
+        const next = [newDoc, ...documents];
+        setDocuments(next);
+        try {
+            localStorage.setItem('wida_patient_vault_documents', JSON.stringify(next));
+        } catch {}
         setUploadSuccess(true);
         setTimeout(() => setUploadSuccess(false), 3000);
     };
     const handleDelete = (id) => {
-        setDocuments(documents.filter((d) => d.id !== id));
+        const next = documents.filter((d) => d.id !== id);
+        setDocuments(next);
+        try {
+            localStorage.setItem('wida_patient_vault_documents', JSON.stringify(next));
+        } catch {}
     };
     return (<div className="patient-medical-vault d-flex flex-column gap-4">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">

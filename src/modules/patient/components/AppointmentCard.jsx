@@ -1,19 +1,26 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, Video, CheckCircle2, AlertCircle } from 'lucide-react';
 export const AppointmentCard = ({ appointment, onCancel, onJoin }) => {
+    const normStatus = (appointment.status || '').toUpperCase();
+    const isConfirmed = normStatus === 'CONFIRMED' || normStatus === 'ACCEPTED';
+    const isPending = normStatus === 'PENDING';
+    const isCompleted = normStatus === 'COMPLETED';
+    const isCancelled = normStatus === 'CANCELLED' || normStatus === 'REJECTED';
+
     const getStatusBadge = () => {
-        switch (appointment.status) {
-            case 'Confirmed':
-                return <span className="patient-badge patient-badge-teal"><CheckCircle2 size={12}/> Confirmed</span>;
-            case 'Pending':
-                return <span className="patient-badge patient-badge-warning"><AlertCircle size={12}/> Pending</span>;
-            case 'Completed':
-                return <span className="patient-badge patient-badge-success">Completed</span>;
-            case 'Cancelled':
-                return <span className="patient-badge patient-badge-danger">Cancelled</span>;
-            default:
-                return <span className="patient-badge patient-badge-neutral">{appointment.status}</span>;
+        if (isConfirmed) {
+            return <span className="patient-badge patient-badge-teal"><CheckCircle2 size={12}/> Confirmed</span>;
         }
+        if (isPending) {
+            return <span className="patient-badge patient-badge-warning" style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}><AlertCircle size={12}/> Pending Doctor</span>;
+        }
+        if (isCompleted) {
+            return <span className="patient-badge patient-badge-success">Completed</span>;
+        }
+        if (isCancelled) {
+            return <span className="patient-badge patient-badge-danger">Cancelled</span>;
+        }
+        return <span className="patient-badge patient-badge-neutral">{appointment.status}</span>;
     };
     return (<div className="patient-card patient-card-hover p-3">
       <div className="d-flex align-items-start justify-content-between mb-3">
@@ -48,19 +55,25 @@ export const AppointmentCard = ({ appointment, onCancel, onJoin }) => {
         </div>
       </div>
 
-      <p style={{ fontSize: '0.82rem', color: 'var(--p-text-muted)' }} className="mb-3">
+      <p style={{ fontSize: '0.82rem', color: 'var(--p-text-muted)' }} className="mb-2">
         <strong>Reason:</strong> {appointment.reason}
       </p>
+
+      {isPending && (
+        <div className="mb-2 p-2 rounded" style={{ fontSize: '0.78rem', backgroundColor: '#fffbeb', color: '#b45309', border: '1px dashed #fcd34d', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span>⏳ Request sent to doctor. You will receive an instant notification & email once accepted.</span>
+        </div>
+      )}
 
       <div className="d-flex align-items-center justify-content-between pt-2 border-top" style={{ borderColor: 'var(--p-border-subtle)' }}>
         <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--p-text-main)' }}>
           ₹{appointment.fee}
         </span>
         <div className="d-flex gap-2">
-          {appointment.status === 'Confirmed' && appointment.type === 'Online' && (<button className="patient-btn patient-btn-primary patient-btn-sm" onClick={() => onJoin && onJoin(appointment)}>
+          {isConfirmed && appointment.type === 'Online' && (<button className="patient-btn patient-btn-primary patient-btn-sm" onClick={() => onJoin && onJoin(appointment)}>
               <Video size={13}/> Join Call
             </button>)}
-          {appointment.status === 'Confirmed' && (<button className="patient-btn patient-btn-outline patient-btn-sm text-danger" style={{ borderColor: 'var(--p-danger)', color: 'var(--p-danger)' }} onClick={() => onCancel && onCancel(appointment.id)}>
+          {(isConfirmed || isPending) && (<button className="patient-btn patient-btn-outline patient-btn-sm text-danger" style={{ borderColor: 'var(--p-danger)', color: 'var(--p-danger)' }} onClick={() => onCancel && onCancel(appointment.id)}>
               Cancel
             </button>)}
         </div>

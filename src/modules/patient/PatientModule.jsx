@@ -17,6 +17,9 @@ import { AppointmentBookingModal } from './components/AppointmentBookingModal';
 import { AICareModal } from './components/AICareModal';
 import { MSWDiagnosticsModal } from './components/MSWDiagnosticsModal';
 import { NotificationToast } from './components/NotificationToast';
+import { MedicalReceiptModal } from './components/MedicalReceiptModal';
+import { emailService } from '../../services/emailService';
+import { doctorApi } from '../../doctor/services/doctorApi';
 // Pages
 import { PatientDashboard } from './pages/PatientDashboard';
 import { PatientAppointments } from './pages/PatientAppointments';
@@ -55,6 +58,7 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
     const [preselectedDoctorId, setPreselectedDoctorId] = useState(undefined);
     const [aiModalOpen, setAiModalOpen] = useState(false);
     const [mswModalOpen, setMswModalOpen] = useState(false);
+    const [receiptPrescription, setReceiptPrescription] = useState(null);
     const [toasts, setToasts] = useState([]);
     // Core Reactive Data Store
     const [profile, setProfile] = useState(() => patientLocalStorageService.getProfile());
@@ -94,6 +98,52 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
     useEffect(() => {
         loadApiData();
     }, []);
+
+    // Real-time Ecosystem Event Listeners (Doctor Acceptance, Prescription Issued, Email Dispatch)
+    useEffect(() => {
+        const handleAppointmentAccepted = (e) => {
+            const { appointmentId, doctor, appointment } = e.detail || {};
+            setAppointments(prev => prev.map(a => 
+                (a.id === appointmentId || a.id === String(appointmentId) || (appointment?.id && a.id === appointment.id)) 
+                    ? { ...a, status: 'Confirmed' } 
+                    : a
+            ));
+            refreshNotifications();
+            refreshReminders();
+            const docName = doctor?.fullName ? `Dr. ${doctor.fullName}` : 'Your doctor';
+            addToast('success', 'Appointment Confirmed!', `${docName} accepted your appointment request.`);
+        };
+
+        const handlePrescriptionCreated = (e) => {
+            const { prescription } = e.detail || {};
+            if (prescription) {
+                setPrescriptions(prev => [prescription, ...prev.filter(p => p.id !== prescription.id)]);
+                refreshNotifications();
+                addToast('info', 'New Digital Prescription Ready', `Dr. ${prescription.doctorName || 'Doctor'} issued a digital prescription & online medical bill.`);
+            }
+        };
+
+        const handleAppointmentStatusUpdated = (e) => {
+            const { id, status } = e.detail || {};
+            setAppointments(prev => prev.map(a => 
+                (a.id === id || a.id === String(id)) 
+                    ? { ...a, status: status === 'ACCEPTED' ? 'Confirmed' : status } 
+                    : a
+            ));
+            refreshNotifications();
+        };
+
+        window.addEventListener('wida:appointment-accepted', handleAppointmentAccepted);
+        window.addEventListener('wida:prescription-created', handlePrescriptionCreated);
+        window.addEventListener('wida:appointment-status-updated', handleAppointmentStatusUpdated);
+
+        return () => {
+            window.removeEventListener('wida:appointment-accepted', handleAppointmentAccepted);
+            window.removeEventListener('wida:prescription-created', handlePrescriptionCreated);
+            window.removeEventListener('wida:appointment-status-updated', handleAppointmentStatusUpdated);
+        };
+    }, []);
+
     // Notifications & Reminders Hooks
     const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, refresh: refreshNotifications } = usePatientNotifications();
     const { reminders, updateStatus: updateReminderStatus, addReminder, deleteReminder, refresh: refreshReminders } = usePatientReminders();
@@ -121,28 +171,68 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
     };
     // Handlers
     const handleBookAppointmentSuccess = async (data) => {
+        const appointmentData = {
+            ...data,
+            status: 'Pending'
+        };
+
+        let createdApt = null;
         try {
-            const newApt = await patientApiService.bookAppointment(data);
-            setAppointments((prev) => [newApt, ...prev.filter(a => a.id !== newApt.id)]);
+            createdApt = await patientApiService.bookAppointment(appointmentData);
+            setAppointments((prev) => [createdApt, ...prev.filter(a => a.id !== createdApt.id)]);
             const journey = await patientApiService.getCareJourney();
             setCareJourney(journey);
         }
         catch {
-            patientLocalStorageService.bookAppointment(data);
+            createdApt = patientLocalStorageService.bookAppointment(appointmentData);
             setAppointments(patientLocalStorageService.getAppointments());
             setCareJourney(patientLocalStorageService.getCareJourney());
         }
-        // Cross-module bridge sync
-        widaBridge.bookAppointment({
-            ...data,
+
+        const aptPayload = {
+            ...appointmentData,
+            id: createdApt?.id || `apt-${Date.now()}`,
             patientName: profile?.name || 'Yashasvi Saini',
             patientPhone: profile?.phone || '+91 98765 43210',
             patientAge: profile?.age || 24,
             patientGender: profile?.gender || 'Male'
+        };
+
+        // Cross-module bridge sync
+        widaBridge.bookAppointment(aptPayload);
+
+        // Notify Doctor in Doctor Module Store
+        const targetDoctorId = data.doctorId || 'doc-1';
+        doctorApi.addNotification(targetDoctorId, {
+            title: 'New Appointment Request',
+            message: `${aptPayload.patientName} requested an appointment for ${data.date} at ${data.time} (${data.type || 'Consultation'}).`,
+            type: 'APPOINTMENT_REQUEST',
+            urgent: false,
+            referenceId: aptPayload.id,
+            actionUrl: '/appointments'
         });
+
+        // Send Email Alert to Doctor
+        const allDocs = widaBridge.getDoctors();
+        const docObj = allDocs.find(d => String(d.id) === String(targetDoctorId));
+        emailService.notifyDoctorNewAppointment({
+            doctor: {
+                id: targetDoctorId,
+                name: data.doctorName || docObj?.name || 'Doctor',
+                email: docObj?.email || 'dr.aarav@wida.health'
+            },
+            patient: {
+                id: profile?.id || 'pat-1',
+                name: aptPayload.patientName,
+                email: profile?.email || 'patient@wida.health',
+                phone: aptPayload.patientPhone
+            },
+            appointment: aptPayload
+        });
+
         refreshNotifications();
         refreshReminders();
-        addToast('success', 'Appointment Confirmed', `Booked with ${data.doctorName} for ${data.date} at ${data.time}.`);
+        addToast('success', 'Appointment Request Sent', `Request submitted to ${data.doctorName} for ${data.date} at ${data.time}. Pending doctor confirmation.`);
     };
     const handleCancelAppointment = async (id) => {
         try {
@@ -377,7 +467,7 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
                     setCurrentTab(step.routeLink);
             }}/>)}
 
-          {currentTab === 'prescriptions' && (<PatientPrescriptions prescriptions={prescriptions} onOrderToPharmacy={handleOrderPrescription}/>)}
+          {currentTab === 'prescriptions' && (<PatientPrescriptions prescriptions={prescriptions} onOrderToPharmacy={handleOrderPrescription} onViewReceipt={(rx) => setReceiptPrescription(rx)}/>)}
 
           {currentTab === 'diagnostics' && (<PatientDiagnostics tests={PATIENT_MOCK_TESTS} labs={PATIENT_MOCK_LABS} reports={PATIENT_MOCK_REPORTS} bookings={labBookings} onBookTest={handleBookLabTest} onSimulateReportReady={handleSimulateReportReady}/>)}
 
@@ -421,6 +511,9 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
       <AICareModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)}/>
 
       <MSWDiagnosticsModal isOpen={mswModalOpen} onClose={() => setMswModalOpen(false)} onDataReset={loadApiData}/>
+
+      {/* Printable Digital Prescription & Medical Bill Receipt Modal */}
+      <MedicalReceiptModal isOpen={!!receiptPrescription} onClose={() => setReceiptPrescription(null)} prescription={receiptPrescription} patient={profile} onOrderToPharmacy={handleOrderPrescription}/>
 
       {/* Floating Real-time Notifications */}
       <NotificationToast toasts={toasts} onDismiss={removeToast}/>

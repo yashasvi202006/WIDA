@@ -4,15 +4,47 @@ import { Calendar, Plus, Search } from 'lucide-react';
 export const PatientAppointments = ({ appointments, onOpenBooking, onCancelAppointment }) => {
     const [tab, setTab] = useState('Upcoming');
     const [search, setSearch] = useState('');
+
+    const isUpcoming = (status) => {
+        const s = (status || '').toUpperCase();
+        return s === 'CONFIRMED' || s === 'ACCEPTED' || s === 'SCHEDULED';
+    };
+    const isPending = (status) => {
+        const s = (status || '').toUpperCase();
+        return s === 'PENDING';
+    };
+    const isCompleted = (status) => {
+        const s = (status || '').toUpperCase();
+        return s === 'COMPLETED';
+    };
+    const isCancelled = (status) => {
+        const s = (status || '').toUpperCase();
+        return s === 'CANCELLED' || s === 'REJECTED';
+    };
+
+    const countMatches = (t) => {
+        if (t === 'All') return appointments.length;
+        if (t === 'Upcoming') return appointments.filter(a => isUpcoming(a.status)).length;
+        if (t === 'Pending') return appointments.filter(a => isPending(a.status)).length;
+        if (t === 'Completed') return appointments.filter(a => isCompleted(a.status)).length;
+        if (t === 'Cancelled') return appointments.filter(a => isCancelled(a.status)).length;
+        return 0;
+    };
+
+    const pendingCount = appointments.filter(a => isPending(a.status)).length;
+
     const filtered = appointments.filter((apt) => {
-        const matchesTab = tab === 'All'
-            ? true
-            : tab === 'Upcoming'
-                ? apt.status === 'Confirmed'
-                : apt.status === tab;
-        const matchesSearch = apt.doctorName.toLowerCase().includes(search.toLowerCase()) ||
-            apt.doctorSpecialization.toLowerCase().includes(search.toLowerCase()) ||
-            apt.reason.toLowerCase().includes(search.toLowerCase());
+        let matchesTab = true;
+        if (tab === 'Upcoming') matchesTab = isUpcoming(apt.status);
+        else if (tab === 'Pending') matchesTab = isPending(apt.status);
+        else if (tab === 'Completed') matchesTab = isCompleted(apt.status);
+        else if (tab === 'Cancelled') matchesTab = isCancelled(apt.status);
+
+        const searchLower = (search || '').toLowerCase();
+        const matchesSearch = !search ||
+            (apt.doctorName || '').toLowerCase().includes(searchLower) ||
+            (apt.doctorSpecialization || '').toLowerCase().includes(searchLower) ||
+            (apt.reason || '').toLowerCase().includes(searchLower);
         return matchesTab && matchesSearch;
     });
     return (<div className="patient-appointments d-flex flex-column gap-4">
@@ -28,11 +60,22 @@ export const PatientAppointments = ({ appointments, onOpenBooking, onCancelAppoi
         </button>
       </div>
 
+      {pendingCount > 0 && tab !== 'Pending' && (
+        <div className="p-3 rounded-3 d-flex align-items-center justify-content-between" style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+          <div className="d-flex align-items-center gap-2">
+            <span>⏳ You have <strong>{pendingCount} appointment request{pendingCount > 1 ? 's' : ''}</strong> pending doctor confirmation.</span>
+          </div>
+          <button className="patient-btn patient-btn-sm" style={{ backgroundColor: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }} onClick={() => setTab('Pending')}>
+            View Pending Requests ({pendingCount})
+          </button>
+        </div>
+      )}
+
       {/* Filter Bar */}
       <div className="patient-card p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div className="d-flex flex-wrap gap-1">
           {['Upcoming', 'Pending', 'Completed', 'Cancelled', 'All'].map((t) => (<button key={t} className={`patient-btn patient-btn-sm ${tab === t ? 'patient-btn-primary' : 'patient-btn-outline'}`} onClick={() => setTab(t)}>
-              {t} ({appointments.filter((a) => (t === 'All' ? true : t === 'Upcoming' ? a.status === 'Confirmed' : a.status === t)).length})
+              {t} ({countMatches(t)})
             </button>))}
         </div>
 

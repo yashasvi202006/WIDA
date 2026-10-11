@@ -7,8 +7,8 @@ import { WellnessWidget } from '../components/WellnessWidget';
 import { DiagnosisHistorySection } from '../components/DiagnosisHistorySection';
 import { UpcomingAppointmentsWidget } from '../components/UpcomingAppointmentsWidget';
 import { AICareWidget } from '../components/AICareWidget';
-import { Calendar, FlaskConical, Pill, FileHeart, Activity, AlertTriangle, CheckCircle2, Landmark, Stethoscope, Microscope, ExternalLink, ArrowRight, ShieldCheck } from 'lucide-react';
-import { widaBridge } from '../../../services/widaEcosystemBridge';
+import { Calendar, FlaskConical, Pill, FileHeart, Activity, AlertTriangle, CheckCircle2, Landmark } from 'lucide-react';
+
 export const PatientDashboard = ({ patient, metrics, reminders, careJourney, prescriptions, wearable, onNavigateTab, onOpenBooking, onReminderStatusChange, onOrderPrescription, onOpenAIChat }) => {
     const activePrescriptions = prescriptions.filter((p) => p.status === 'Active').slice(0, 1);
     return (<div className="patient-dashboard d-flex flex-column gap-4">
@@ -30,125 +30,6 @@ export const PatientDashboard = ({ patient, metrics, reminders, careJourney, pre
           <button className="patient-btn patient-btn-primary" onClick={onOpenBooking}>
             <Calendar size={15}/> Book Appointment
           </button>
-        </div>
-      </div>
-
-      {/* Interconnected Multi-Module Ecosystem Hub */}
-      <div className="patient-card p-3 p-md-4" style={{ background: 'linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%)', borderColor: '#99f6e4' }}>
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-          <div className="d-flex align-items-center gap-2">
-            <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#0d9488', boxShadow: '0 0 8px #0d9488' }} />
-            <h5 className="mb-0 font-heading" style={{ fontSize: '1.05rem', color: '#0f766e' }}>
-              Connected Clinical Ecosystem Hub
-            </h5>
-            <span className="patient-badge patient-badge-teal py-1 px-2" style={{ fontSize: '0.72rem' }}>
-              Real-time Cross-Module Telemetry Active
-            </span>
-          </div>
-          <span className="text-muted" style={{ fontSize: '0.78rem' }}>
-            Universal Patient Registry: <strong style={{ color: '#0f766e' }}>{patient.name}</strong>
-          </span>
-        </div>
-
-        <div className="row g-3">
-          {/* Doctor Module Card */}
-          <div className="col-md-4">
-            <div className="p-3 rounded border bg-white h-100 d-flex flex-column justify-content-between shadow-sm" style={{ borderColor: '#ccfbf1' }}>
-              <div>
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <div className="d-flex align-items-center gap-2">
-                    <span style={{ fontSize: '1.25rem' }}>🩺</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>Doctor Module</strong>
-                  </div>
-                  <span className="badge" style={{ backgroundColor: '#f0fdfa', color: '#007C77', border: '1px solid #99f6e4', fontSize: '0.7rem' }}>
-                    WIDA.doc
-                  </span>
-                </div>
-                <p className="text-muted mb-2" style={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-                  Consultation schedules, EHR history, and direct clinical appointments with certified physicians.
-                </p>
-                <div className="d-flex align-items-center gap-1 text-muted mb-3" style={{ fontSize: '0.76rem' }}>
-                  <ShieldCheck size={13} style={{ color: '#007C77' }} />
-                  <span>Dr. Aarav Sharma (Cardiology) & 4 Specialists</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="patient-btn w-100 py-2 justify-content-center"
-                style={{ backgroundColor: '#007C77', color: '#fff', fontSize: '0.82rem', fontWeight: 600 }}
-                onClick={() => widaBridge.switchPortal('doctor')}
-              >
-                <span>Launch Doctor Workspace</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Diagnostic Lab Module Card */}
-          <div className="col-md-4">
-            <div className="p-3 rounded border bg-white h-100 d-flex flex-column justify-content-between shadow-sm" style={{ borderColor: '#ccfbf1' }}>
-              <div>
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <div className="d-flex align-items-center gap-2">
-                    <span style={{ fontSize: '1.25rem' }}>🔬</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>Diagnostic Laboratory</strong>
-                  </div>
-                  <span className="badge" style={{ backgroundColor: '#f0fdf4', color: '#0d9488', border: '1px solid #a7f3d0', fontSize: '0.7rem' }}>
-                    WIDA.lab
-                  </span>
-                </div>
-                <p className="text-muted mb-2" style={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-                  NABL accredited pathology testing, barcode accessioning, and certified clinical reports.
-                </p>
-                <div className="d-flex align-items-center gap-1 text-muted mb-3" style={{ fontSize: '0.76rem' }}>
-                  <FlaskConical size={13} style={{ color: '#0d9488' }} />
-                  <span>HealthFirst Pathology Labs (Port 8082, SQLite lab.db)</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="patient-btn w-100 py-2 justify-content-center"
-                style={{ backgroundColor: '#0D9488', color: '#fff', fontSize: '0.82rem', fontWeight: 600 }}
-                onClick={() => widaBridge.switchPortal('lab')}
-              >
-                <span>Launch Lab Workspace</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Pharmacy Module Card */}
-          <div className="col-md-4">
-            <div className="p-3 rounded border bg-white h-100 d-flex flex-column justify-content-between shadow-sm" style={{ borderColor: '#ccfbf1' }}>
-              <div>
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <div className="d-flex align-items-center gap-2">
-                    <span style={{ fontSize: '1.25rem' }}>💊</span>
-                    <strong style={{ fontSize: '0.92rem', color: '#0f172a' }}>Central Pharmacy</strong>
-                  </div>
-                  <span className="badge" style={{ backgroundColor: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', fontSize: '0.7rem' }}>
-                    WIDA.pharmacy
-                  </span>
-                </div>
-                <p className="text-muted mb-2" style={{ fontSize: '0.8rem', lineHeight: 1.4 }}>
-                  Hospital dispensing, medicine inventory, barcode verification, and prescription fulfillment.
-                </p>
-                <div className="d-flex align-items-center gap-1 text-muted mb-3" style={{ fontSize: '0.76rem' }}>
-                  <Pill size={13} style={{ color: '#16a34a' }} />
-                  <span>WIDA Central Hospital & Pharmacy</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="patient-btn w-100 py-2 justify-content-center"
-                style={{ backgroundColor: '#16A34A', color: '#fff', fontSize: '0.82rem', fontWeight: 600 }}
-                onClick={() => widaBridge.switchPortal('pharmacy')}
-              >
-                <span>Launch Pharmacy Workspace</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 

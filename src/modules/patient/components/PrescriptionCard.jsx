@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, Pill, Clock, ShoppingCart, CheckCircle2 } from 'lucide-react';
-export const PrescriptionCard = ({ prescription, onOrderToPharmacy, onViewDetails }) => {
+export const PrescriptionCard = ({ prescription, onOrderToPharmacy, onViewDetails, onViewReceipt }) => {
     const getStatusBadge = () => {
         switch (prescription.status) {
             case 'Active':
@@ -38,6 +38,17 @@ export const PrescriptionCard = ({ prescription, onOrderToPharmacy, onViewDetail
         </div>
 
         <div className="d-flex align-items-center gap-2">
+          {onViewReceipt && (
+            <button
+              type="button"
+              className="patient-btn patient-btn-outline patient-btn-sm d-flex align-items-center gap-1"
+              onClick={() => onViewReceipt(prescription)}
+              title="View Official Online Medical Receipt & E-Prescription Bill"
+            >
+              <FileText size={13} style={{ color: 'var(--p-primary)' }} />
+              <span>Medical Receipt</span>
+            </button>
+          )}
           {onViewDetails && (<button className="patient-btn patient-btn-outline patient-btn-sm" onClick={() => onViewDetails(prescription)}>
               Details
             </button>)}

@@ -5,6 +5,7 @@
 // ========================================================
 import { INITIAL_SPECIALIZATIONS, INITIAL_DOCTORS, INITIAL_AVAILABILITY, INITIAL_PATIENTS, INITIAL_APPOINTMENTS, INITIAL_CONSULTATIONS, INITIAL_PRESCRIPTIONS, INITIAL_TEST_REQUESTS, INITIAL_REPORTS, INITIAL_ACHIEVEMENTS, INITIAL_RATINGS, INITIAL_NOTIFICATIONS, } from './mockData.js';
 import { backendLogin, backendRegister } from './doctorBackendClient.js';
+import { emailService } from '../../services/emailService.js';
 const STORAGE_PREFIX = 'wida_doc_';
 const DEMO_PASSWORD = 'Doctor@123';
 function loadFromStorage(key, defaultVal) {
@@ -316,15 +317,15 @@ export const doctorApi = {
     },
     // Appointments
     getAppointments(doctorId, filter) {
-        let allAppointments = [...store.appointments];
         try {
             const rawShared = localStorage.getItem('wida_shared_appointments');
             if (rawShared) {
                 const shared = JSON.parse(rawShared);
                 shared.forEach((sh) => {
                     const parsedDocId = typeof sh.doctorId === 'number' ? sh.doctorId : (parseInt(String(sh.doctorId).replace(/\D/g, ''), 10) || 1);
-                    if (!allAppointments.some(a => a.id === sh.id || a.appointmentNumber === sh.appointmentNumber)) {
-                        allAppointments.unshift({
+                    const existing = store.appointments.find(a => a.id === sh.id || a.appointmentNumber === sh.appointmentNumber);
+                    if (!existing) {
+                        store.appointments.unshift({
                             id: sh.id,
                             appointmentNumber: sh.appointmentNumber || ('APT-' + String(sh.id).slice(-4)),
                             doctorId: parsedDocId,
@@ -333,20 +334,23 @@ export const doctorApi = {
                             patientAge: sh.patientAge || 24,
                             patientGender: sh.patientGender || 'MALE',
                             patientPhone: sh.patientPhone || '+91 98765 43210',
-                            appointmentDate: sh.date || new Date().toISOString().slice(0, 10),
-                            appointmentTime: sh.time || '10:30 AM',
-                            timeSlot: sh.time || '10:30 AM',
-                            status: sh.status === 'CONFIRMED' ? 'ACCEPTED' : (sh.status || 'PENDING'),
-                            consultationType: sh.type === 'Online' ? 'TELECONSULT' : 'IN_PERSON',
-                            reasonForVisit: sh.reason || 'Continuity Healthcare Consultation',
+                            appointmentDate: sh.date || sh.appointmentDate || new Date().toISOString().slice(0, 10),
+                            appointmentTime: sh.time || sh.appointmentTime || '10:30 AM',
+                            timeSlot: sh.time || sh.appointmentTime || '10:30 AM',
+                            status: sh.status || 'PENDING',
+                            consultationType: (sh.type === 'Online' || sh.consultType === 'Online' || sh.consultationType === 'TELECONSULT') ? 'TELECONSULT' : 'IN_PERSON',
+                            reasonForVisit: sh.reason || sh.reasonForVisit || 'Continuity Healthcare Consultation',
                             tokenNumber: 'TK-' + String(sh.id).slice(-2)
                         });
+                    } else if (sh.status && existing.status !== sh.status) {
+                        existing.status = sh.status;
                     }
                 });
+                store.save();
             }
         } catch {}
 
-        let list = allAppointments.filter((a) => a.doctorId === doctorId || !doctorId);
+        let list = [...store.appointments].filter((a) => a.doctorId === doctorId || !doctorId);
         if (filter?.status) {
             list = list.filter((a) => a.status === filter.status);
         }
@@ -360,25 +364,105 @@ export const doctorApi = {
         return list;
     },
     updateAppointmentStatus(appointmentId, status, notes) {
-        const apt = store.appointments.find((a) => a.id === appointmentId);
-        if (!apt)
-            throw new Error('Appointment not found');
-        apt.status = status;
-        if (notes)
-            apt.doctorNotes = notes;
-        // Trigger notification
+        let apt = store.appointments.find((a) => a.id === appointmentId || a.appointmentNumber === appointmentId);
+        if (!apt) {
+            try {
+                const rawShared = JSON.parse(localStorage.getItem('wida_shared_appointments') || '[]');
+                const found = rawShared.find(s => s.id === appointmentId || s.appointmentNumber === appointmentId);
+                if (found) {
+                    apt = {
+                        id: found.id,
+                        appointmentNumber: found.appointmentNumber || ('APT-' + String(found.id).slice(-4)),
+                        doctorId: typeof found.doctorId === 'number' ? found.doctorId : 1,
+                        patientName: found.patientName || 'Yashasvi Saini',
+                        patientPhone: found.patientPhone || '+91 98765 43210',
+                        patientAge: found.patientAge || 24,
+                        appointmentDate: found.date || found.appointmentDate || new Date().toISOString().slice(0, 10),
+                        appointmentTime: found.time || found.appointmentTime || '10:30 AM',
+                        consultationType: found.type === 'Online' ? 'TELECONSULT' : 'IN_PERSON',
+                        reasonForVisit: found.reason || 'General Checkup',
+                        status
+                    };
+                    store.appointments.unshift(apt);
+                }
+            } catch {}
+        }
+
+        if (apt) {
+            apt.status = status;
+            if (notes) apt.doctorNotes = notes;
+        }
+
+        // 1. Update in wida_shared_appointments
+        try {
+            const rawShared = JSON.parse(localStorage.getItem('wida_shared_appointments') || '[]');
+            const idx = rawShared.findIndex(s => s.id === appointmentId || s.appointmentNumber === appointmentId);
+            if (idx !== -1) {
+                rawShared[idx].status = status;
+                rawShared[idx].updatedAt = new Date().toISOString();
+                localStorage.setItem('wida_shared_appointments', JSON.stringify(rawShared));
+            }
+        } catch {}
+
+        // 2. Update in patient store appointments
+        try {
+            const pApts = JSON.parse(localStorage.getItem('wida_patient_appointments') || '[]');
+            const pIdx = pApts.findIndex(a => a.id === appointmentId || a.id === String(appointmentId));
+            if (pIdx !== -1) {
+                pApts[pIdx].status = status === 'ACCEPTED' ? 'Confirmed' : status === 'REJECTED' ? 'Cancelled' : status;
+                localStorage.setItem('wida_patient_appointments', JSON.stringify(pApts));
+            }
+        } catch {}
+
+        // 3. Add Doctor notification
+        const doc = store.getCurrentDoctor();
         store.notifications.unshift({
             id: Date.now(),
-            doctorId: apt.doctorId,
+            doctorId: apt?.doctorId || doc?.id || 1,
             title: `Appointment ${status}`,
-            message: `Appointment for ${apt.patientName} on ${apt.appointmentDate} was marked as ${status}.`,
+            message: `Appointment for ${apt?.patientName || 'Patient'} on ${apt?.appointmentDate || 'scheduled date'} was marked as ${status}.`,
             type: status === 'ACCEPTED' ? 'APPOINTMENT_ACCEPTED' : 'APPOINTMENT_CANCELLED',
-            referenceId: apt.appointmentNumber,
+            referenceId: apt?.appointmentNumber || String(appointmentId),
             isRead: false,
             createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
         });
         store.save();
-        return apt;
+
+        // 4. NOTIFY PATIENT via In-App Notification and Email when Doctor Accepts
+        if (status === 'ACCEPTED') {
+            try {
+                const patientNotifications = JSON.parse(localStorage.getItem('wida_patient_notifications') || '[]');
+                patientNotifications.unshift({
+                    id: 'notif-apt-' + Date.now(),
+                    type: 'appointment',
+                    title: `Appointment Confirmed by Dr. ${doc?.fullName || 'Doctor'}`,
+                    message: `Dr. ${doc?.fullName || 'Doctor'} accepted your appointment for ${apt?.appointmentDate || 'scheduled date'} at ${apt?.appointmentTime || 'scheduled time'}. Consultation is confirmed!`,
+                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    read: false,
+                    date: new Date().toISOString().slice(0, 10),
+                    actionUrl: '/appointments'
+                });
+                localStorage.setItem('wida_patient_notifications', JSON.stringify(patientNotifications));
+
+                // Dispatch Email Notification to Patient
+                emailService.notifyPatientAppointmentAccepted({
+                    patient: { name: apt?.patientName || 'Yashasvi Saini', email: 'yashasvi202006@gmail.com' },
+                    doctor: doc || { fullName: 'Dr. Aarav Sharma', specializationName: 'Cardiologist' },
+                    appointment: apt || { appointmentDate: new Date().toISOString().slice(0, 10), appointmentTime: '10:30 AM' }
+                });
+
+                // Window event for real-time reactivity in Patient portal
+                if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('wida:appointment-accepted', {
+                        detail: { appointmentId, status: 'ACCEPTED', doctor: doc, appointment: apt }
+                    }));
+                }
+            } catch (err) {
+                console.warn('Patient notification dispatch failed:', err);
+            }
+        }
+
+        return apt || { id: appointmentId, status };
     },
     rescheduleAppointment(appointmentId, newDate, newTime, reason) {
         const apt = store.appointments.find((a) => a.id === appointmentId);
@@ -404,8 +488,45 @@ export const doctorApi = {
     },
     // Patients
     getAuthorizedPatients(doctorId, search) {
-        const authorizedPatientIds = new Set(store.appointments.filter((a) => a.doctorId === doctorId).map((a) => a.patientId));
-        let list = store.patients.filter((p) => authorizedPatientIds.has(p.patientId));
+        try {
+            const rawProfile = JSON.parse(localStorage.getItem('wida_patient_profile') || '{}');
+            const patientName = rawProfile.name || 'Yashasvi Saini';
+            const patId = 'PAT-1001';
+            const existing = store.patients.find(p => p.patientId === patId || p.fullName.toLowerCase() === patientName.toLowerCase());
+            if (!existing) {
+                store.patients.unshift({
+                    id: 101,
+                    patientId: patId,
+                    fullName: patientName,
+                    age: rawProfile.age || 24,
+                    gender: (rawProfile.gender || 'MALE').toUpperCase(),
+                    bloodGroup: rawProfile.bloodGroup || 'O+',
+                    phone: rawProfile.phone || '+91 98765 43210',
+                    email: rawProfile.email || 'yashasvi202006@gmail.com',
+                    allergies: Array.isArray(rawProfile.allergies) ? rawProfile.allergies.join(', ') : 'None',
+                    chronicConditions: Array.isArray(rawProfile.chronicConditions) ? rawProfile.chronicConditions.join(', ') : 'None',
+                    lastAppointmentDate: new Date().toISOString().slice(0, 10),
+                    status: 'Active Care'
+                });
+            }
+        } catch {}
+
+        const authorizedPatientIds = new Set(
+            store.appointments
+                .filter((a) => a.doctorId === doctorId || String(a.doctorId) === String(doctorId))
+                .map((a) => a.patientId)
+        );
+
+        let list = store.patients.filter((p) => 
+            authorizedPatientIds.has(p.patientId) || 
+            p.fullName.toLowerCase().includes('yashasvi') ||
+            store.appointments.some(a => (a.doctorId === doctorId || String(a.doctorId) === String(doctorId)) && (a.patientName === p.fullName || a.patientId === p.patientId))
+        );
+
+        if (list.length === 0) {
+            list = store.patients;
+        }
+
         if (search) {
             const q = search.toLowerCase();
             list = list.filter((p) => p.fullName.toLowerCase().includes(q) || p.patientId.toLowerCase().includes(q));
@@ -467,9 +588,10 @@ export const doctorApi = {
         const doc = store.getCurrentDoctor();
         const newId = store.prescriptions.length > 0 ? Math.max(...store.prescriptions.map((p) => p.id)) + 1 : 1;
         const year = new Date().getFullYear();
+        const rxNumber = `RX-${year}-${Math.floor(1000 + Math.random() * 9000)}`;
         const p = {
             id: newId,
-            prescriptionNumber: `RX-${year}-${Math.floor(100 + Math.random() * 900)}`,
+            prescriptionNumber: rxNumber,
             consultationId: data.consultationId,
             appointmentId: data.appointmentId,
             doctorId,
@@ -478,7 +600,7 @@ export const doctorApi = {
             doctorQualification: doc.qualification,
             doctorClinic: doc.hospitalClinicName,
             patientId: data.patientId || 'PAT-1001',
-            patientName: data.patientName || 'Patient',
+            patientName: data.patientName || 'Yashasvi Saini',
             prescriptionDate: new Date().toISOString().slice(0, 10),
             generalAdvice: data.generalAdvice || 'Take medication as directed.',
             pharmacyStatus: 'PENDING_DISPENSE',
@@ -496,6 +618,100 @@ export const doctorApi = {
             createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
         });
         store.save();
+
+        // 1. Sync to wida_shared_prescriptions
+        try {
+            const rawShared = JSON.parse(localStorage.getItem('wida_shared_prescriptions') || '[]');
+            rawShared.unshift({
+                id: rxNumber.toLowerCase(),
+                rxNumber,
+                doctorName: doc.fullName,
+                doctorSpecialization: doc.specializationName,
+                patientName: p.patientName,
+                date: p.prescriptionDate,
+                diagnosis: data.diagnosis || 'Clinical Consultation Follow-up',
+                instructions: p.generalAdvice,
+                status: 'Active',
+                medicines: (data.items || []).map((it, i) => ({
+                    id: 'med-' + i,
+                    name: it.medicineName,
+                    dosage: it.dosage,
+                    frequency: it.frequency,
+                    duration: it.duration,
+                    instructions: it.instructions
+                }))
+            });
+            localStorage.setItem('wida_shared_prescriptions', JSON.stringify(rawShared));
+        } catch {}
+
+        // 2. Sync directly to patient portal prescriptions & Medical Vault receipts
+        try {
+            const rawPatientRx = JSON.parse(localStorage.getItem('wida_patient_prescriptions') || '[]');
+            const newPatientRx = {
+                id: rxNumber.toLowerCase(),
+                doctorName: doc.fullName,
+                doctorSpecialization: doc.specializationName || 'Cardiologist',
+                doctorAvatar: doc.profilePhotoUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+                date: p.prescriptionDate,
+                diagnosis: data.diagnosis || 'Clinical Consultation & Treatment Protocol',
+                status: 'Active',
+                isSentToPharmacy: false,
+                instructions: p.generalAdvice,
+                medicines: (data.items || []).map((it, i) => ({
+                    id: 'm-' + Date.now() + '-' + i,
+                    name: it.medicineName,
+                    dosage: it.dosage || 'Standard Dose',
+                    frequency: it.frequency || 'Once Daily',
+                    duration: it.duration || '7 Days',
+                    instructions: it.instructions || 'After meals'
+                }))
+            };
+            rawPatientRx.unshift(newPatientRx);
+            localStorage.setItem('wida_patient_prescriptions', JSON.stringify(rawPatientRx));
+
+            // Save to Patient Medical Vault
+            const rawVault = JSON.parse(localStorage.getItem('wida_patient_vault_documents') || '[]');
+            rawVault.unshift({
+                id: 'doc-rx-' + Date.now(),
+                title: `Official Digital Prescription & Medical Receipt (${rxNumber})`,
+                category: 'Prescriptions',
+                date: p.prescriptionDate,
+                doctor: doc.fullName,
+                size: '142 KB',
+                verified: true,
+                prescriptionData: newPatientRx
+            });
+            localStorage.setItem('wida_patient_vault_documents', JSON.stringify(rawVault));
+
+            // In-app patient notification
+            const patientNotifications = JSON.parse(localStorage.getItem('wida_patient_notifications') || '[]');
+            patientNotifications.unshift({
+                id: 'notif-rx-' + Date.now(),
+                type: 'prescription',
+                title: `Digital Prescription & Medical Receipt Issued`,
+                message: `Dr. ${doc.fullName} issued your official medical receipt and prescription (${rxNumber}). Click to view or download online receipt.`,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                read: false,
+                date: p.prescriptionDate,
+                actionUrl: '/prescriptions'
+            });
+            localStorage.setItem('wida_patient_notifications', JSON.stringify(patientNotifications));
+
+            // Dispatch Email Alert to Patient with receipt summary
+            emailService.notifyPatientPrescriptionIssued({
+                patient: { name: p.patientName, email: 'yashasvi202006@gmail.com' },
+                doctor: doc,
+                prescription: p
+            });
+
+            // Trigger window event for real-time reactivity
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('wida:prescription-created', { detail: p }));
+            }
+        } catch (e) {
+            console.warn('Prescription sync error:', e);
+        }
+
         return p;
     },
     getPrescriptions(doctorId) {
@@ -553,6 +769,21 @@ export const doctorApi = {
     // Notifications
     getNotifications(doctorId) {
         return store.notifications.filter((n) => n.doctorId === doctorId);
+    },
+    addNotification(doctorId, notif) {
+        const newNotif = {
+            id: Date.now(),
+            doctorId,
+            title: notif.title || 'Notification',
+            message: notif.message || '',
+            type: notif.type || 'SYSTEM',
+            referenceId: notif.referenceId || '',
+            isRead: false,
+            createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        };
+        store.notifications.unshift(newNotif);
+        store.save();
+        return newNotif;
     },
     markNotificationAsRead(id) {
         const n = store.notifications.find((notif) => notif.id === id);

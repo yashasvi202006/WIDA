@@ -2,6 +2,7 @@
  * WIDA Integrated Healthcare Ecosystem — Unified Cross-Module Data Bridge
  * Connects Patient, Doctor, Diagnostic Laboratory, and Pharmacy domains with real-time persistence.
  */
+import { emailService } from './emailService';
 
 // Initial Seed Data from each domain
 const INITIAL_DOCTORS = [
@@ -433,27 +434,85 @@ class WidaEcosystemBridge {
 
     bookAppointment(apt) {
         const appointments = this.getAppointments();
+        const aptId = apt.id || ('apt-' + Date.now());
         const newApt = {
-            id: 'apt-' + Date.now(),
-            status: 'CONFIRMED',
+            id: aptId,
+            appointmentNumber: apt.appointmentNumber || ('APT-' + String(aptId).slice(-4)),
+            status: apt.status || 'PENDING',
             createdAt: new Date().toISOString(),
             ...apt
         };
         appointments.unshift(newApt);
         localStorage.setItem('wida_shared_appointments', JSON.stringify(appointments));
+
+        // Sync with doctor appointments in localStorage
+        try {
+            const rawDocApts = JSON.parse(localStorage.getItem('wida_doc_appointments') || '[]');
+            const parsedDocId = typeof newApt.doctorId === 'number' ? newApt.doctorId : (parseInt(String(newApt.doctorId).replace(/\D/g, ''), 10) || 1);
+            if (!rawDocApts.some(a => a.id === newApt.id || a.appointmentNumber === newApt.appointmentNumber)) {
+                rawDocApts.unshift({
+                    id: newApt.id,
+                    appointmentNumber: newApt.appointmentNumber,
+                    doctorId: parsedDocId,
+                    patientId: newApt.patientId || 'PID-2026-901',
+                    patientName: newApt.patientName || 'Yashasvi Saini',
+                    patientAge: newApt.patientAge || 24,
+                    patientGender: newApt.patientGender || 'MALE',
+                    patientPhone: newApt.patientPhone || '+91 98765 43210',
+                    appointmentDate: newApt.date || newApt.appointmentDate || new Date().toISOString().slice(0, 10),
+                    appointmentTime: newApt.time || newApt.appointmentTime || '10:30 AM',
+                    timeSlot: newApt.time || newApt.appointmentTime || '10:30 AM',
+                    status: newApt.status || 'PENDING',
+                    consultationType: (newApt.type === 'Online' || newApt.consultType === 'Online' || newApt.consultationType === 'TELECONSULT') ? 'TELECONSULT' : 'IN_PERSON',
+                    reasonForVisit: newApt.reason || newApt.reasonForVisit || 'Continuity Healthcare Consultation',
+                    tokenNumber: 'TK-' + String(newApt.id).slice(-2)
+                });
+                localStorage.setItem('wida_doc_appointments', JSON.stringify(rawDocApts));
+            }
+        } catch {}
+
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('wida:appointment-booked', { detail: newApt }));
+        }
         return newApt;
     }
 
-    updateAppointmentStatus(id, newStatus) {
+    updateAppointmentStatus(id, newStatus, meta = {}) {
         const appointments = this.getAppointments();
-        const idx = appointments.findIndex(a => a.id === id);
+        const idx = appointments.findIndex(a => a.id === id || a.appointmentNumber === id);
+        let updated = null;
         if (idx !== -1) {
             appointments[idx].status = newStatus;
             appointments[idx].updatedAt = new Date().toISOString();
+            if (meta.doctorNotes) appointments[idx].doctorNotes = meta.doctorNotes;
             localStorage.setItem('wida_shared_appointments', JSON.stringify(appointments));
-            return appointments[idx];
+            updated = appointments[idx];
         }
-        return null;
+
+        // Also update doctor store
+        try {
+            const docApts = JSON.parse(localStorage.getItem('wida_doc_appointments') || '[]');
+            const dIdx = docApts.findIndex(a => a.id === id || a.appointmentNumber === id);
+            if (dIdx !== -1) {
+                docApts[dIdx].status = newStatus;
+                localStorage.setItem('wida_doc_appointments', JSON.stringify(docApts));
+            }
+        } catch {}
+
+        // Also update patient store
+        try {
+            const pApts = JSON.parse(localStorage.getItem('wida_patient_appointments') || '[]');
+            const pIdx = pApts.findIndex(a => a.id === id || a.id === String(id));
+            if (pIdx !== -1) {
+                pApts[pIdx].status = newStatus === 'ACCEPTED' ? 'Confirmed' : newStatus === 'REJECTED' ? 'Cancelled' : newStatus;
+                localStorage.setItem('wida_patient_appointments', JSON.stringify(pApts));
+            }
+        } catch {}
+
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('wida:appointment-status-updated', { detail: { id, status: newStatus } }));
+        }
+        return updated;
     }
 
     // Lab Bookings (Patient <-> Lab)

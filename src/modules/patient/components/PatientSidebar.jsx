@@ -25,14 +25,6 @@ export const PatientSidebar = ({ currentTab, onSelectTab, collapsed, onToggleCol
             ]
         },
         {
-            title: 'ECOSYSTEM PORTALS',
-            items: [
-                { id: 'portal-doctor', label: 'Doctor Workspace', icon: <Stethoscope size={18} style={{ color: '#007C77' }} />, isPortal: 'doctor' },
-                { id: 'portal-lab', label: 'Diagnostic Lab', icon: <Microscope size={18} style={{ color: '#0D9488' }} />, isPortal: 'lab' },
-                { id: 'portal-pharmacy', label: 'Central Pharmacy', icon: <Pill size={18} style={{ color: '#16A34A' }} />, isPortal: 'pharmacy' },
-            ]
-        },
-        {
             title: 'SERVICES',
             items: [
                 {

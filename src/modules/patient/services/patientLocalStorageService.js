@@ -54,7 +54,7 @@ export const patientLocalStorageService = {
             date: data.date,
             time: data.time,
             type: data.type,
-            status: 'Confirmed',
+            status: data.status || 'Pending',
             reason: data.reason || 'General health consultation',
             fee: data.fee,
             location: data.location || (data.type === 'Online' ? 'Telehealth Video Room' : 'Max Hospital OPD Block 3'),
@@ -65,8 +65,8 @@ export const patientLocalStorageService = {
         // Automated Notification & Reminder
         patientNotificationService.createNotification({
             type: 'appointment',
-            title: 'Appointment Confirmed',
-            message: `Appointment confirmed with ${data.doctorName} for ${data.date} at ${data.time}.`,
+            title: 'Appointment Request Submitted',
+            message: `Appointment request submitted with ${data.doctorName} for ${data.date} at ${data.time}. Awaiting doctor confirmation.`,
             priority: 'high',
             actionUrl: 'appointments',
             relatedId: newApt.id
@@ -82,6 +82,12 @@ export const patientLocalStorageService = {
             relatedEntityId: newApt.id
         });
         return newApt;
+    },
+    updateAppointmentStatus(id, status) {
+        const list = this.getAppointments();
+        const updated = list.map((a) => (a.id === id || a.id === String(id) ? { ...a, status } : a));
+        localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(updated));
+        return updated;
     },
     cancelAppointment(id) {
         const list = this.getAppointments();

@@ -37,8 +37,13 @@ export default function App() {
   const [showAuthGateway, setShowAuthGateway] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('login') === 'true') return true;
-    const existing = widaBridge.getCurrentUser();
-    return !existing;
+    const p = params.get('portal');
+    if (p && ['doctor', 'patient', 'lab', 'pharmacy'].includes(p)) {
+      const existing = widaBridge.getCurrentUser();
+      return !existing;
+    }
+    // By default, visiting website opens the login page directly
+    return true;
   });
 
   const handlePortalSwitch = (newPortal) => {
@@ -77,8 +82,9 @@ export default function App() {
     setShowAuthGateway(true);
     try {
       const url = new URL(window.location.href);
+      url.searchParams.delete('portal');
       url.searchParams.set('login', 'true');
-      window.history.replaceState({}, '', url.toString());
+      window.history.replaceState({}, '', url.pathname + '?login=true');
     } catch {
       // Ignore URL errors
     }

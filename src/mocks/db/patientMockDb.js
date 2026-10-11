@@ -99,7 +99,7 @@ class PatientMockDb {
             date: data.date,
             time: data.time,
             type: data.type,
-            status: 'Confirmed',
+            status: data.status || 'Pending',
             reason: data.reason || 'General health consultation',
             fee: data.fee,
             location: data.location || (data.type === 'Online' ? 'Telehealth Video Room' : 'Max Hospital OPD Block 3'),
@@ -109,8 +109,8 @@ class PatientMockDb {
         // Auto-create care journey step
         const journeyStep = {
             id: `cj-${Date.now()}`,
-            title: `Consultation Confirmed: ${data.doctorName}`,
-            subtitle: `${data.doctorSpecialization} • ${data.type} Consultation`,
+            title: `Appointment Requested: ${data.doctorName}`,
+            subtitle: `${data.doctorSpecialization} • ${data.type} Consultation (Pending)`,
             date: `${data.date}, ${data.time}`,
             provider: data.doctorName,
             status: 'in_progress',
@@ -121,8 +121,8 @@ class PatientMockDb {
         // Auto-create reminder & notification
         this.addNotification({
             type: 'appointment',
-            title: 'Appointment Booked',
-            message: `Confirmed with ${data.doctorName} for ${data.date} at ${data.time}.`,
+            title: 'Appointment Request Submitted',
+            message: `Appointment request submitted with ${data.doctorName} for ${data.date} at ${data.time}. Awaiting doctor confirmation.`,
             priority: 'high',
             actionUrl: 'appointments'
         });

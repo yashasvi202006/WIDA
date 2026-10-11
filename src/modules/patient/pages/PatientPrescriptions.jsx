@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { FileText, Search } from 'lucide-react';
-export const PatientPrescriptions = ({ prescriptions, onOrderToPharmacy }) => {
+export const PatientPrescriptions = ({ prescriptions, onOrderToPharmacy, onViewReceipt }) => {
     const [tab, setTab] = useState('Active');
     const [search, setSearch] = useState('');
     const filtered = prescriptions.filter((rx) => {
@@ -43,7 +43,7 @@ export const PatientPrescriptions = ({ prescriptions, onOrderToPharmacy }) => {
             Your prescriptions will appear here automatically following your doctor consultations.
           </p>
         </div>) : (<div>
-          {filtered.map((rx) => (<PrescriptionCard key={rx.id} prescription={rx} onOrderToPharmacy={onOrderToPharmacy}/>))}
+          {filtered.map((rx) => (<PrescriptionCard key={rx.id} prescription={rx} onOrderToPharmacy={onOrderToPharmacy} onViewReceipt={onViewReceipt} />))}
         </div>)}
     </div>);
 };
