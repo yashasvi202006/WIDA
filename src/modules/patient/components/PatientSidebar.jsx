@@ -1,5 +1,6 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, UserCheck, MessageSquare, Sparkles, FileHeart, Pill, FlaskConical, Store, Activity, AlertTriangle, Landmark, Flower2, Bell, ShieldCheck, Settings, FolderLock, ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, UserCheck, MessageSquare, Sparkles, FileHeart, Pill, FlaskConical, Store, Activity, AlertTriangle, Landmark, Flower2, Bell, ShieldCheck, Settings, FolderLock, ChevronLeft, ChevronRight, LogOut, Stethoscope, Microscope } from 'lucide-react';
+import { widaBridge } from '../../../services/widaEcosystemBridge';
 export const PatientSidebar = ({ currentTab, onSelectTab, collapsed, onToggleCollapse, patient, mobileOpen, onCloseMobile, onLogout }) => {
     const navSections = [
         {
@@ -21,6 +22,14 @@ export const PatientSidebar = ({ currentTab, onSelectTab, collapsed, onToggleCol
                 { id: 'pharmacy', label: 'Pharmacy', icon: <Store size={18}/> },
                 { id: 'wellness', label: 'Wellness', icon: <Activity size={18}/> },
                 { id: 'vault', label: 'Medical Vault', icon: <FolderLock size={18}/> }
+            ]
+        },
+        {
+            title: 'ECOSYSTEM PORTALS',
+            items: [
+                { id: 'portal-doctor', label: 'Doctor Workspace', icon: <Stethoscope size={18} style={{ color: '#007C77' }} />, isPortal: 'doctor' },
+                { id: 'portal-lab', label: 'Diagnostic Lab', icon: <Microscope size={18} style={{ color: '#0D9488' }} />, isPortal: 'lab' },
+                { id: 'portal-pharmacy', label: 'Central Pharmacy', icon: <Pill size={18} style={{ color: '#16A34A' }} />, isPortal: 'pharmacy' },
             ]
         },
         {
@@ -84,6 +93,11 @@ export const PatientSidebar = ({ currentTab, onSelectTab, collapsed, onToggleCol
             {sec.items.map((item) => {
                 const isActive = currentTab === item.id;
                 return (<button key={item.id} onClick={() => {
+                        if (item.isPortal) {
+                            widaBridge.switchPortal(item.isPortal);
+                            onCloseMobile();
+                            return;
+                        }
                         onSelectTab(item.id);
                         onCloseMobile();
                     }} className={`patient-nav-item ${isActive ? 'active' : ''} ${item.isDanger ? 'text-danger' : ''}`} title={collapsed ? item.label : undefined}>

@@ -23,7 +23,7 @@ import { ProfileUpdate } from './components/ProfileUpdate';
 import { DoctorProfileModal } from './components/DoctorProfileModal';
 import { getCurrentUser, logoutUser, loadMedicines, saveMedicines, loadPrescriptions, savePrescriptions, loadSuppliers, saveSuppliers, loadPurchaseOrders, savePurchaseOrders, loadSalesInvoices, saveSalesInvoices, loadCustomerOrders, saveCustomerOrders, loadReturns, saveReturns, loadNotifications, saveNotifications } from './database/pharmacyDB';
 
-export const PharmacyDashboard = () => {
+export const PharmacyDashboard = ({ onLogout }) => {
     const [currentUser, setCurrentUser] = useState(() => getCurrentUser());
     const [activeTab, setActiveTab] = useState('dashboard');
     const [searchTerm, setSearchTerm] = useState('');
@@ -247,6 +247,10 @@ export const PharmacyDashboard = () => {
     const handleTabChange = (tab) => {
         if (tab === 'logout') {
             logoutUser();
+            if (onLogout) {
+                onLogout();
+                return;
+            }
             setCurrentUser(null);
             setActiveTab('dashboard');
         } else {

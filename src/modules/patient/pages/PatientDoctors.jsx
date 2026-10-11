@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DoctorCard } from '../components/DoctorCard';
-import { Search, ShieldCheck } from 'lucide-react';
+import { Search, ShieldCheck, Stethoscope, ExternalLink } from 'lucide-react';
+import { widaBridge } from '../../../services/widaEcosystemBridge';
 export const PatientDoctors = ({ doctors, onBookDoctor, onViewDoctorProfile }) => {
     const [search, setSearch] = useState('');
     const [selectedSystem, setSelectedSystem] = useState('All');
@@ -23,9 +24,22 @@ export const PatientDoctors = ({ doctors, onBookDoctor, onViewDoctorProfile }) =
             Book in-person hospital visits or digital teleconsultations across Allopathy, Ayurveda, and Homeopathy
           </p>
         </div>
-        <span className="patient-badge patient-badge-teal py-2 px-3">
-          <ShieldCheck size={14}/> 100% NBE & Medical Council Verified
-        </span>
+        <div className="d-flex align-items-center gap-2">
+          <span className="patient-badge patient-badge-teal py-2 px-3">
+            <ShieldCheck size={14}/> 100% NBE & Medical Council Verified
+          </span>
+          <button
+            type="button"
+            className="patient-btn patient-btn-outline py-2 px-3 d-flex align-items-center gap-2"
+            style={{ borderColor: '#007C77', color: '#007C77', fontWeight: 700 }}
+            onClick={() => widaBridge.switchPortal('doctor')}
+            title="Launch WIDA Doctor Clinical Management Portal"
+          >
+            <Stethoscope size={15} />
+            <span>Open Doctor Portal</span>
+            <ExternalLink size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}

@@ -36,4 +36,6 @@ target/
 bin/
 *.class
 *.db
+*.db-shm
+*.db-wal
 *.jar

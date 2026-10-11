@@ -82,6 +82,10 @@ class LabApiClient {
             let res;
             try {
                 res = await fetch(url, { ...options, headers });
+                const contentType = res.headers.get('content-type') || '';
+                if (!contentType.includes('application/json') && baseUrl !== DEFAULT_API_BASE) {
+                    res = await fetch(`${DEFAULT_API_BASE}${endpoint}`, { ...options, headers });
+                }
             } catch (networkErr) {
                 // If proxy failed, retry directly to backend 8082
                 if (baseUrl !== DEFAULT_API_BASE) {

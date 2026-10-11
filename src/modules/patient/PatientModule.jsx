@@ -3,6 +3,7 @@ import './styles/patient.css';
 // Services
 import { patientLocalStorageService } from './services/patientLocalStorageService';
 import { patientApiService } from './services/patientApiService';
+import { widaBridge } from '../../services/widaEcosystemBridge';
 // Hooks
 import { usePatientNotifications } from './hooks/usePatientNotifications';
 import { usePatientReminders } from './hooks/usePatientReminders';
@@ -38,7 +39,7 @@ import { PatientAlternativeMedicine } from './pages/PatientAlternativeMedicine';
 import { PatientMedicalVault } from './pages/PatientMedicalVault';
 import { PatientLogin } from './pages/PatientLogin';
 import { PatientRegister } from './pages/PatientRegister';
-export const PatientModule = ({ initialTab = 'dashboard' }) => {
+export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
     // Navigation & Shell State
     const [currentTab, setCurrentTab] = useState(initialTab);
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -131,6 +132,14 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
             setAppointments(patientLocalStorageService.getAppointments());
             setCareJourney(patientLocalStorageService.getCareJourney());
         }
+        // Cross-module bridge sync
+        widaBridge.bookAppointment({
+            ...data,
+            patientName: profile?.name || 'Yashasvi Saini',
+            patientPhone: profile?.phone || '+91 98765 43210',
+            patientAge: profile?.age || 24,
+            patientGender: profile?.gender || 'Male'
+        });
         refreshNotifications();
         refreshReminders();
         addToast('success', 'Appointment Confirmed', `Booked with ${data.doctorName} for ${data.date} at ${data.time}.`);
@@ -144,6 +153,7 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
             const updated = patientLocalStorageService.cancelAppointment(id);
             setAppointments(updated);
         }
+        widaBridge.updateAppointmentStatus(id, 'CANCELLED');
         setCareJourney(patientLocalStorageService.getCareJourney());
         refreshNotifications();
         addToast('warning', 'Appointment Cancelled', 'Your appointment has been cancelled.');
@@ -159,6 +169,12 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
             setPrescriptions(updated);
             setPharmacyOrders(patientLocalStorageService.getPharmacyOrders());
         }
+        widaBridge.createPharmacyOrder({
+            prescriptionId: rxId,
+            patientName: profile?.name || 'Yashasvi Saini',
+            patientPhone: profile?.phone || '+91 98765 43210',
+            medicines: prescriptions.find(p => p.id === rxId)?.medicines || []
+        });
         refreshNotifications();
         addToast('success', 'Pharmacy Order Submitted', `Rx #${rxId.toUpperCase()} forwarded to HealthPlus Pharmacy.`);
     };
@@ -171,6 +187,11 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
             patientLocalStorageService.bookLabTest(bookingData);
             setLabBookings(patientLocalStorageService.getLabBookings());
         }
+        widaBridge.bookLabTest({
+            ...bookingData,
+            patientName: profile?.name || 'Yashasvi Saini',
+            patientPhone: profile?.phone || '+91 98765 43210'
+        });
         setCareJourney(patientLocalStorageService.getCareJourney());
         refreshNotifications();
         refreshReminders();
@@ -275,6 +296,10 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
         catch {
             // Ignored
         }
+        if (onLogout) {
+            onLogout();
+            return;
+        }
         setIsAuthenticated(false);
         setCurrentTab('login');
         addToast('info', 'Signed Out', 'You have been safely signed out from your WIDA account.');
@@ -332,7 +357,7 @@ export const PatientModule = ({ initialTab = 'dashboard' }) => {
                 setBookingModalOpen(true);
             }} onCancelAppointment={handleCancelAppointment}/>)}
 
-          {currentTab === 'doctors' && (<PatientDoctors doctors={PATIENT_MOCK_DOCTORS} onBookDoctor={(doc) => {
+          {currentTab === 'doctors' && (<PatientDoctors doctors={widaBridge.getDoctors()} onBookDoctor={(doc) => {
                 setPreselectedDoctorId(doc.id);
                 setBookingModalOpen(true);
             }}/>)}

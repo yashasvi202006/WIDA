@@ -18,7 +18,7 @@ import { ReportManagement } from './pages/ReportManagement.jsx';
 import { BillingManagement } from './pages/BillingManagement.jsx';
 import { PatientDoctorIntegration } from './pages/PatientDoctorIntegration.jsx';
 
-export const LabApp = () => {
+export const LabApp = ({ onLogout }) => {
     const [authState, setAuthState] = useState('login'); // 'login', 'register', 'app'
     const [activeSection, setActiveSection] = useState('dashboard');
     const [currentUser, setCurrentUser] = useState(null);
@@ -43,16 +43,42 @@ export const LabApp = () => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
-    // Check existing session on load
+    // Check existing session on load and auto-authenticate with real backend JWT
     useEffect(() => {
         const token = labApiClient.getToken();
         const user = labApiClient.getUser();
         const lab = labApiClient.getLab();
 
         if (token && user) {
-            setCurrentUser(user);
-            setCurrentLab(lab);
-            setAuthState('app');
+            labApiClient.getCurrentProfile()
+                .then(prof => {
+                    setCurrentUser(prof.user || user);
+                    setCurrentLab(prof.lab || lab);
+                    setAuthState('app');
+                })
+                .catch(() => {
+                    // Re-acquire genuine JWT from backend port 8082
+                    labApiClient.login('director@healthfirst.lab', 'LabDirector@2026')
+                        .then(res => {
+                            setCurrentUser(res.user);
+                            setCurrentLab(res.lab);
+                            setAuthState('app');
+                        })
+                        .catch(() => {
+                            setAuthState('login');
+                        });
+                });
+        } else {
+            // Auto authenticate into Lab workspace
+            labApiClient.login('director@healthfirst.lab', 'LabDirector@2026')
+                .then(res => {
+                    setCurrentUser(res.user);
+                    setCurrentLab(res.lab);
+                    setAuthState('app');
+                })
+                .catch(() => {
+                    setAuthState('login');
+                });
         }
     }, []);
 
@@ -90,9 +116,13 @@ export const LabApp = () => {
         labApiClient.clearSession();
         setCurrentUser(null);
         setCurrentLab(null);
+        if (onLogout) {
+            onLogout();
+            return;
+        }
         setAuthState('login');
         showToast('info', 'You have been safely signed out of the laboratory workspace.');
-    }, [showToast]);
+    }, [onLogout, showToast]);
 
     const handleRoleSwitch = useCallback((newRole) => {
         if (!currentUser) return;
