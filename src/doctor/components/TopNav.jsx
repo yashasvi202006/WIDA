@@ -24,16 +24,17 @@ export const TopNav = ({ doctor, allDoctors, onSwitchDoctor, unreadCount, onOpen
           ☰
         </button>
 
-        <div className="doc-demo-switch">
-          <span style={{ opacity: 0.7, fontSize: '12px' }}>🩺</span>
+        <div className="doc-demo-switch" style={{ gap: '8px' }}>
+          <span style={{ fontSize: '13px' }}>🩺</span>
           <span style={{ fontWeight: 600, color: 'var(--doc-primary-dark)', fontSize: '12px' }}>
-            Active Specialist:
+            Registered Doctor:
           </span>
-          <select className="doc-demo-select" value={doctor.id} onChange={(e) => onSwitchDoctor(Number(e.target.value))}>
-            {allDoctors.map((d) => (<option key={d.id} value={d.id}>
-                {d.fullName} — {d.specializationName}
-              </option>))}
-          </select>
+          <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+            {doctor.fullName}
+          </span>
+          <span style={{ fontSize: '11px', color: '#007C77', background: '#CCFBF1', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+            🆔 Reg ID: {doctor.medicalRegistrationNumber || `DOC-${doctor.id}`}
+          </span>
         </div>
       </div>
 

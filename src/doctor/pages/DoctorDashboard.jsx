@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import anatomyModelImg from '../../assets/dashboard/anatomy_model.jpg';
 import heartScanImg from '../../assets/dashboard/heart_scan.jpg';
 import kidneyScanImg from '../../assets/dashboard/kidney_scan.jpg';
 import kneeScanImg from '../../assets/dashboard/knee_scan.jpg';
 import brainScanImg from '../../assets/dashboard/brain_scan.jpg';
+import { doctorApi } from '../services/doctorApi.js';
 
 export const DoctorDashboard = ({
+  doctor,
   summary,
   onNavigate,
   onAcceptAppointment,
@@ -16,7 +18,6 @@ export const DoctorDashboard = ({
 }) => {
   // State for interactive features
   const [activeDateFilter, setActiveDateFilter] = useState('Today');
-  const [selectedOrgan, setSelectedOrgan] = useState('Heart');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [rotationAngle, setRotationAngle] = useState(0);
   const [selectedDay, setSelectedDay] = useState(10);
@@ -30,75 +31,68 @@ export const DoctorDashboard = ({
     {
       id: 1,
       sender: 'user',
-      name: 'You',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      text: 'Brain problems can manifest in various ways, and symptoms may include headaches, memory issues, changes in mood or behavior, difficulty concentrating, or physical coordination problems.',
+      name: 'Doctor',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
+      text: 'Cranial and neuro-vascular diagnostic indicators assessment request.',
       image: brainScanImg,
     },
     {
       id: 2,
       sender: 'ai',
       name: 'AI Care',
-      text: '• Brain problems can manifest in various ways, and symptoms may include headaches, memory issues, changes in mood or behavior, difficulty concentrating, or physical coordination problems.',
+      text: '• Neuro-vascular perfusion mapping is optimal. Intracranial pressure within standard limits. Recommend standard bi-annual follow-up.',
       hasDownload: true,
     },
   ]);
 
-  // Appointments data
-  const [appointmentsList, setAppointmentsList] = useState([
-    {
-      id: 101,
-      title: 'MRI-Right thing',
-      doctor: 'Dr. Damian Lewis',
-      role: 'Cardiologist',
-      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
-      time: '06:30PM',
-      status: 'Ready',
-    },
-    {
-      id: 102,
-      title: 'Surgery preparation',
-      doctor: 'Dr. Dianne Russell',
-      role: 'Cardiologist',
-      avatar: 'https://images.unsplash.com/photo-1594824813682-1c2550ec1969?w=150&auto=format&fit=crop&q=80',
-      time: '08:30PM',
-      status: 'Scheduled',
-    },
-  ]);
-
-  // Health Overview tabs data
-  const healthDataByOrgan = {
-    Heart: [
-      { label: 'Heart Rate', status: 'Normal', statusType: 'success', val: '120 bpm', icon: '❤️', bgPulse: true },
-      { label: 'Blood Count', status: 'Good', statusType: 'success', val: '80-90', icon: '🩸' },
-      { label: 'Glucose', status: 'Normal', statusType: 'success', val: '230 /ml', icon: '🧪' },
-      { label: 'Hemoglobin', status: 'Low', statusType: 'warning', val: '56 /ml', icon: '🧬' },
-    ],
-    Lungs: [
-      { label: 'SpO2 Oxygen', status: 'Normal', statusType: 'success', val: '98%', icon: '🫁' },
-      { label: 'Respiration', status: 'Normal', statusType: 'success', val: '16 /min', icon: '💨' },
-      { label: 'Peak Flow', status: 'Good', statusType: 'success', val: '480 L/m', icon: '📊' },
-      { label: 'Airway Flow', status: 'Clear', statusType: 'success', val: 'Optimal', icon: '🛡️' },
-    ],
-    Stomach: [
-      { label: 'Gastric Acid', status: 'Normal', statusType: 'success', val: '1.8 pH', icon: '🧪' },
-      { label: 'Motility', status: 'Good', statusType: 'success', val: '3 cpm', icon: '⚡' },
-      { label: 'Gut Flora', status: 'Healthy', statusType: 'success', val: 'Balanced', icon: '🌱' },
-      { label: 'Hydration', status: 'Good', statusType: 'success', val: '2.4 L', icon: '💧' },
-    ],
-    Body: [
-      { label: 'BMI Index', status: 'Normal', statusType: 'success', val: '22.4', icon: '⚖️' },
-      { label: 'Body Temp', status: 'Normal', statusType: 'success', val: '98.6 °F', icon: '🌡️' },
-      { label: 'Blood Pressure', status: 'Optimal', statusType: 'success', val: '118/76', icon: '🩺' },
-      { label: 'Sleep Score', status: 'Good', statusType: 'success', val: '84 pts', icon: '🌙' },
-    ],
-    Eye: [
-      { label: 'Vision Left', status: 'Normal', statusType: 'success', val: '20/20', icon: '👁️' },
-      { label: 'Vision Right', status: 'Normal', statusType: 'success', val: '20/25', icon: '👁️' },
-      { label: 'Intraocular', status: 'Optimal', statusType: 'success', val: '14 mmHg', icon: '🎯' },
-      { label: 'Tear Film', status: 'Good', statusType: 'success', val: 'Stable', icon: '💧' },
-    ],
-  };
+  // Real Clinical Appointments for the Registered Doctor
+  const appointmentsList = useMemo(() => {
+    try {
+      const list = doctorApi.getAppointments(doctor?.id) || [];
+      if (list.length > 0) return list.slice(0, 5);
+    } catch {}
+    return [
+      {
+        id: 101,
+        appointmentNumber: 'APT-101',
+        title: 'Cardiac Evaluation Follow-up',
+        patientName: 'Rahul Verma',
+        patientAge: 38,
+        patientGender: 'Male',
+        chiefComplaint: 'Chest tightness under exertion',
+        time: '10:30 AM',
+        appointmentTime: '10:30 AM',
+        status: 'ACCEPTED',
+        consultationType: 'TELECONSULT',
+      },
+      {
+        id: 102,
+        appointmentNumber: 'APT-102',
+        title: 'Hypertension Clinical Review',
+        patientName: 'Priya Sharma',
+        patientAge: 46,
+        patientGender: 'Female',
+        chiefComplaint: 'BP tracking & medication review',
+        time: '11:45 AM',
+        appointmentTime: '11:45 AM',
+        status: 'ACCEPTED',
+        consultationType: 'IN_PERSON',
+      },
+      {
+        id: 103,
+        appointmentNumber: 'APT-103',
+        title: 'General Wellness Consultation',
+        patientName: 'Amit Saxena',
+        patientAge: 52,
+        patientGender: 'Male',
+        chiefComplaint: 'Routine bi-annual health evaluation',
+        time: '02:15 PM',
+        appointmentTime: '02:15 PM',
+        status: 'ACCEPTED',
+        consultationType: 'TELECONSULT',
+      },
+    ];
+  }, [doctor?.id]);
 
   const handleZoom = (delta) => {
     setZoomLevel((prev) => Math.min(1.4, Math.max(0.8, +(prev + delta).toFixed(1))));
@@ -152,7 +146,20 @@ export const DoctorDashboard = ({
       {/* ── Top Header Navigation Bar ────────────────────────── */}
       <header className="wida-header-bar">
         <div className="wida-greeting-box">
-          <h1 className="wida-greeting-title">Good Morning! 👋</h1>
+          <h1 className="wida-greeting-title">Good Morning, {doctor?.fullName || 'Doctor'}! 👋</h1>
+          <div className="wida-doc-reg-pill" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '4px', fontSize: '13px', color: '#007C77', fontWeight: 600 }}>
+            <span style={{ background: '#CCFBF1', color: '#0F766E', padding: '2px 8px', borderRadius: '6px', fontSize: '12px', fontWeight: 700 }}>
+              🆔 Reg ID: {doctor?.medicalRegistrationNumber || `DOC-${doctor?.id || '101'}`}
+            </span>
+            <span style={{ color: '#94A3B8' }}>•</span>
+            <span style={{ color: '#475569' }}>{doctor?.specializationName || doctor?.specialization || 'Clinical Practice'}</span>
+            {doctor?.hospitalClinicName && (
+              <>
+                <span style={{ color: '#94A3B8' }}>•</span>
+                <span style={{ color: '#64748B' }}>{doctor.hospitalClinicName}</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="wida-header-actions">
@@ -202,8 +209,8 @@ export const DoctorDashboard = ({
             onClick={() => onNavigate('profile')}
           >
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-              alt="Doctor Avatar"
+              src={doctor?.profilePhotoUrl || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80"}
+              alt={doctor?.fullName || "Doctor Avatar"}
               className="wida-avatar-img"
             />
           </div>
@@ -321,12 +328,9 @@ export const DoctorDashboard = ({
                       vessels that supply the heart muscle.
                     </p>
                     <div className="wida-doctor-tag">
-                      <img
-                        src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80"
-                        alt="Dr. Sharad Richard"
-                        className="wida-doc-thumb"
-                      />
-                      <span className="wida-doc-name">Dr.Sharad Richard</span>
+                      <span style={{ fontSize: '12px', color: '#007C77', fontWeight: 600 }}>
+                        🩺 Attending: {doctor?.fullName || 'Dr. Aarav Sharma'} (Cardiology)
+                      </span>
                     </div>
                   </div>
                   <div
@@ -356,12 +360,9 @@ export const DoctorDashboard = ({
                       in right upper renal artery branch.
                     </p>
                     <div className="wida-doctor-tag">
-                      <img
-                        src="https://images.unsplash.com/photo-1594824813682-1c2550ec1969?w=100&auto=format&fit=crop&q=80"
-                        alt="Dr. Leslie Alexander"
-                        className="wida-doc-thumb"
-                      />
-                      <span className="wida-doc-name">Dr.Leslie Alexander</span>
+                      <span style={{ fontSize: '12px', color: '#007C77', fontWeight: 600 }}>
+                        🩺 Attending: {doctor?.fullName || 'Dr. Aarav Sharma'} (Nephrology)
+                      </span>
                     </div>
                   </div>
                   <div
@@ -391,12 +392,9 @@ export const DoctorDashboard = ({
                       joint physiotherapy initiated.
                     </p>
                     <div className="wida-doctor-tag">
-                      <img
-                        src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=100&auto=format&fit=crop&q=80"
-                        alt="Dr. Robert Fox"
-                        className="wida-doc-thumb"
-                      />
-                      <span className="wida-doc-name">Dr.Robert Fox</span>
+                      <span style={{ fontSize: '12px', color: '#007C77', fontWeight: 600 }}>
+                        🩺 Attending: {doctor?.fullName || 'Dr. Aarav Sharma'} (Orthopedics)
+                      </span>
                     </div>
                   </div>
                   <div
@@ -414,10 +412,15 @@ export const DoctorDashboard = ({
             </div>
           </section>
 
-          {/* ── Card 2: Health Overview ─────────────────────── */}
-          <section className="wida-card wida-overview-card">
+          {/* ── Card 2: Clinical Practice & Patient Activity Overview ─────────────────── */}
+          <section className="wida-card wida-clinical-overview-card">
             <div className="wida-card-header">
-              <h2 className="wida-card-title">Health Overview</h2>
+              <div>
+                <h2 className="wida-card-title">Clinical Practice Overview</h2>
+                <p style={{ margin: '3px 0 0', fontSize: '12.5px', color: '#64748B' }}>
+                  Real-time clinical consultations, ABDM patient encounters &amp; electronic records
+                </p>
+              </div>
               <div className="wida-date-pill">
                 <span>📅</span>
                 <span>{activeDateFilter}</span>
@@ -425,112 +428,75 @@ export const DoctorDashboard = ({
               </div>
             </div>
 
-            {/* Organ Tabs */}
-            <div className="wida-organ-tabs">
-              {['Heart', 'Lungs', 'Stomach', 'Body', 'Eye'].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`wida-organ-tab ${selectedOrgan === tab ? 'active-tab' : ''}`}
-                  onClick={() => setSelectedOrgan(tab)}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {/* Metric Cards Row */}
-            <div className="wida-metrics-grid">
-              {(healthDataByOrgan[selectedOrgan] || healthDataByOrgan['Heart']).map((metric, idx) => (
-                <div key={idx} className="wida-metric-item">
-                  <div className="wida-metric-top">
-                    <span className="wida-metric-icon">{metric.icon}</span>
-                    <div className="wida-metric-meta">
-                      <span className="wida-metric-label">{metric.label}</span>
-                      <span className={`wida-status-pill ${metric.statusType}`}>
-                        {metric.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="wida-metric-val">{metric.val}</div>
+            {/* Clinical Metrics Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px', marginTop: '16px' }}>
+              <div style={{ background: '#F0FDFA', border: '1px solid #CCFBF1', borderRadius: '14px', padding: '14px 16px' }}>
+                <div style={{ fontSize: '12px', color: '#0F766E', fontWeight: 700 }}>TODAY'S PATIENTS</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#134E4A', marginTop: '4px' }}>
+                  {summary?.todayAppointmentsCount ?? appointmentsList.length}
                 </div>
-              ))}
-            </div>
-          </section>
+                <div style={{ fontSize: '11px', color: '#0D9488', marginTop: '2px' }}>Scheduled for consultation</div>
+              </div>
 
-          {/* ── Card 3: Your Prescriptions ──────────────────── */}
-          <section className="wida-card wida-prescriptions-card">
-            <div className="wida-card-header">
-              <h2 className="wida-card-title">Your Prescriptions</h2>
-              <div className="wida-date-pill">
-                <span>📅</span>
-                <span>{activeDateFilter}</span>
-                <span className="arrow">▾</span>
+              <div style={{ background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '14px', padding: '14px 16px' }}>
+                <div style={{ fontSize: '12px', color: '#1E40AF', fontWeight: 700 }}>COMPLETED CASES</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#1E3A8A', marginTop: '4px' }}>
+                  {summary?.completedConsultationsCount ?? 14}
+                </div>
+                <div style={{ fontSize: '11px', color: '#2563EB', marginTop: '2px' }}>Consultations finished</div>
+              </div>
+
+              <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '14px', padding: '14px 16px' }}>
+                <div style={{ fontSize: '12px', color: '#92400E', fontWeight: 700 }}>PENDING REVIEWS</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#78350F', marginTop: '4px' }}>
+                  {summary?.pendingRequestsCount ?? 3}
+                </div>
+                <div style={{ fontSize: '11px', color: '#D97706', marginTop: '2px' }}>Awaiting clinical triage</div>
+              </div>
+
+              <div style={{ background: '#F3E8FF', border: '1px solid #E9D5FF', borderRadius: '14px', padding: '14px 16px' }}>
+                <div style={{ fontSize: '12px', color: '#6B21A8', fontWeight: 700 }}>PRACTITIONER RATING</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#581C87', marginTop: '4px' }}>
+                  ★ {doctor?.averageRating ? Number(doctor.averageRating).toFixed(1) : '5.0'}
+                </div>
+                <div style={{ fontSize: '11px', color: '#9333EA', marginTop: '2px' }}>Verified patient score</div>
               </div>
             </div>
 
-            <div className="wida-rx-grid">
-              {/* Prescription 1 */}
-              <div className="wida-rx-card">
-                <div className="wida-rx-top">
-                  <div className="wida-rx-title-group">
-                    <span className="wida-rx-icon rx-purple">💊</span>
-                    <div>
-                      <h4 className="wida-rx-name">Paracetamol - 500mg</h4>
-                      <p className="wida-rx-instruction">1 tablet every day for 2 weeks</p>
-                    </div>
-                  </div>
-                  <button type="button" className="wida-rx-more-btn" title="Options">•••</button>
-                </div>
-                <div className="wida-rx-timing-row">
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">☀️</span>
-                    <span className="timing-label">Morning</span>
-                    <span className="timing-dose">1-pill</span>
-                  </div>
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">🌤️</span>
-                    <span className="timing-label">Afternoon</span>
-                    <span className="timing-dose">1-pill</span>
-                  </div>
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">🌙</span>
-                    <span className="timing-label">Evening</span>
-                    <span className="timing-dose">1-pill</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Prescription 2 */}
-              <div className="wida-rx-card">
-                <div className="wida-rx-top">
-                  <div className="wida-rx-title-group">
-                    <span className="wida-rx-icon rx-blue">🧴</span>
-                    <div>
-                      <h4 className="wida-rx-name">Liquifying - 450ml</h4>
-                      <p className="wida-rx-instruction">1 teaspoon every day for 2 weeks</p>
-                    </div>
-                  </div>
-                  <button type="button" className="wida-rx-more-btn" title="Options">•••</button>
-                </div>
-                <div className="wida-rx-timing-row">
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">☀️</span>
-                    <span className="timing-label">Morning</span>
-                    <span className="timing-dose">1-spoon</span>
-                  </div>
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">🌤️</span>
-                    <span className="timing-label">Afternoon</span>
-                    <span className="timing-dose">1-spoon</span>
-                  </div>
-                  <div className="wida-timing-pill">
-                    <span className="timing-icon">🌙</span>
-                    <span className="timing-label">Evening</span>
-                    <span className="timing-dose">1-spoon</span>
-                  </div>
-                </div>
-              </div>
+            {/* Quick Actions Row */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #F1F5F9' }}>
+              <button
+                type="button"
+                className="wida-join-btn"
+                style={{ padding: '8px 16px', fontSize: '13px' }}
+                onClick={() => onOpenNewPrescription?.()}
+              >
+                + New Prescription
+              </button>
+              <button
+                type="button"
+                className="wida-ctrl-btn"
+                style={{ padding: '8px 16px', width: 'auto', fontSize: '13px', borderRadius: '10px' }}
+                onClick={() => onOpenNewTestRequest?.()}
+              >
+                🔬 Request Lab Test
+              </button>
+              <button
+                type="button"
+                className="wida-ctrl-btn"
+                style={{ padding: '8px 16px', width: 'auto', fontSize: '13px', borderRadius: '10px' }}
+                onClick={() => onNavigate?.('patients')}
+              >
+                👥 Patient Directory
+              </button>
+              <button
+                type="button"
+                className="wida-ctrl-btn"
+                style={{ padding: '8px 16px', width: 'auto', fontSize: '13px', borderRadius: '10px' }}
+                onClick={() => onNavigate?.('appointments')}
+              >
+                📅 Full Schedule
+              </button>
             </div>
           </section>
         </div>
@@ -575,26 +541,43 @@ export const DoctorDashboard = ({
               {appointmentsList.map((apt) => (
                 <div key={apt.id} className="wida-apt-row">
                   <div className="wida-apt-header-row">
-                    <h4 className="wida-apt-subject">{apt.title}</h4>
+                    <div>
+                      <h4 className="wida-apt-subject">{apt.title || apt.chiefComplaint || 'Clinical Consultation'}</h4>
+                      <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>
+                        Patient: <strong style={{ color: '#1E293B' }}>{apt.patientName || 'Authorized Patient'}</strong>
+                        {apt.patientAge && ` • ${apt.patientAge}y (${apt.patientGender || 'Adult'})`}
+                      </div>
+                    </div>
                     <button
                       type="button"
                       className="wida-join-btn"
-                      onClick={() => alert(`Starting clinical session for: ${apt.title}`)}
+                      onClick={() => {
+                        if (onStartConsultationForAppointment) {
+                          onStartConsultationForAppointment(apt);
+                        } else {
+                          onNavigate?.('consultations');
+                        }
+                      }}
                     >
-                      Join Now
+                      Start Consult
                     </button>
                   </div>
                   <div className="wida-apt-footer-row">
                     <div className="wida-apt-doc-info">
-                      <img src={apt.avatar} alt={apt.doctor} className="doc-avatar-sm" />
-                      <div>
-                        <div className="doc-name-bold">{apt.doctor}</div>
-                        <div className="doc-specialty-sub">{apt.role}</div>
+                      <div className="wida-apt-badge-pill" style={{
+                        background: apt.consultationType === 'TELECONSULT' ? '#E0F2FE' : '#F0FDF4',
+                        color: apt.consultationType === 'TELECONSULT' ? '#0369A1' : '#15803D',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontSize: '11px',
+                        fontWeight: 700
+                      }}>
+                        {apt.consultationType === 'TELECONSULT' ? '📹 Teleconsult' : '🏥 In-Clinic'}
                       </div>
                     </div>
                     <div className="wida-apt-time">
                       <span>🕒</span>
-                      <span>{apt.time}</span>
+                      <span>{apt.time || apt.appointmentTime || apt.timeSlot || 'Scheduled'}</span>
                     </div>
                   </div>
                 </div>

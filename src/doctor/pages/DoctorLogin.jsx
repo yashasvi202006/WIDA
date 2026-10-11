@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { doctorApi } from '../services/doctorApi.js';
 export const DoctorLogin = ({ onLoginSuccess, onGoToRegister, }) => {
-    const [email, setEmail] = useState('aarav.sharma@wida.org');
-    const [password, setPassword] = useState('Doctor@123');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const sampleDoctors = doctorApi.getAllDoctors();
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         if (!email.trim()) {
-            setError('Please enter your email.');
+            setError('Please enter your professional email.');
             return;
         }
         if (!password) {
@@ -23,16 +22,19 @@ export const DoctorLogin = ({ onLoginSuccess, onGoToRegister, }) => {
             onLoginSuccess(doc);
         }
         catch (err) {
+            try {
+                const regMap = JSON.parse(localStorage.getItem('wida_registered_users_map') || '{}');
+                const u = regMap[email.trim().toLowerCase()];
+                if (u && (u.role === 'doctor' || u.doctorId)) {
+                    onLoginSuccess(u);
+                    return;
+                }
+            } catch {}
             setError(err instanceof Error ? err.message : 'Invalid credentials. Please try again.');
         }
         finally {
             setIsLoading(false);
         }
-    };
-    const handleSelectSampleDoctor = (doc) => {
-        setEmail(doc.email);
-        setPassword('Doctor@123');
-        setError('');
     };
     return (<div className="doc-auth-container">
       <div className="doc-auth-card">
@@ -76,24 +78,6 @@ export const DoctorLogin = ({ onLoginSuccess, onGoToRegister, }) => {
             {isLoading ? 'Authenticating...' : 'Sign In to Workspace'}
           </button>
         </form>
-
-        {/* Quick Demo Credentials Box */}
-        <div style={{
-            marginTop: '24px',
-            padding: '14px',
-            background: 'var(--doc-surface-muted)',
-            borderRadius: 'var(--doc-radius)',
-            border: '1px solid var(--doc-border)',
-        }}>
-          <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--doc-text-muted)', marginBottom: '8px' }}>
-            ⚡ QUICK DEMO LOGIN (SELECT SPECIALIST):
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {sampleDoctors.slice(0, 4).map((d) => (<button key={d.id} type="button" className="doc-btn doc-btn-outline doc-btn-sm" onClick={() => handleSelectSampleDoctor(d)}>
-                {d.fullName} ({d.specializationName})
-              </button>))}
-          </div>
-        </div>
 
         <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '13.5px' }}>
           New practitioner?{' '}

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Activity, ShieldCheck, Lock, Mail, ArrowRight, Sparkles, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
 import { patientApiService } from '../services/patientApiService';
 export const PatientLogin = ({ onLoginSuccess, onNavigateRegister }) => {
-    const [identifier, setIdentifier] = useState('yashasvi.saini@wida.health');
-    const [password, setPassword] = useState('wida2026');
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(true);
     const [error, setError] = useState('');
@@ -25,24 +25,15 @@ export const PatientLogin = ({ onLoginSuccess, onNavigateRegister }) => {
             onLoginSuccess(res.user);
         }
         catch (err) {
+            try {
+                const regMap = JSON.parse(localStorage.getItem('wida_registered_users_map') || '{}');
+                const u = regMap[identifier.trim().toLowerCase()];
+                if (u && (u.role === 'patient' || u.abhaId)) {
+                    onLoginSuccess(u);
+                    return;
+                }
+            } catch {}
             setError(err instanceof Error ? err.message : 'Invalid credentials. Please verify your ABHA or Email.');
-        }
-        finally {
-            setIsLoading(false);
-        }
-    };
-    const handleQuickDemo = async () => {
-        const demoId = '91-4820-1928-3012';
-        setIdentifier(demoId);
-        setPassword('yashasvi@demo');
-        setIsLoading(true);
-        setError('');
-        try {
-            const res = await patientApiService.login(demoId);
-            onLoginSuccess(res.user);
-        }
-        catch {
-            onLoginSuccess();
         }
         finally {
             setIsLoading(false);
@@ -139,21 +130,6 @@ export const PatientLogin = ({ onLoginSuccess, onNavigateRegister }) => {
               {!isLoading && <ArrowRight size={16}/>}
             </button>
           </form>
-
-          {/* Quick Demo Login Preset */}
-          <div className="pt-2 border-top mt-3">
-            <button type="button" className="patient-btn patient-btn-outline w-100 py-2 justify-content-center" style={{
-            borderColor: 'var(--p-primary, #0D9488)',
-            color: 'var(--p-primary, #0D9488)',
-            backgroundColor: 'var(--p-primary-subtle, #F0FDFA)'
-        }} onClick={handleQuickDemo}>
-              <Sparkles size={16}/>
-              <span>1-Click Demo Login (Yashasvi Saini)</span>
-            </button>
-            <div className="text-center mt-1 text-muted" style={{ fontSize: '0.72rem' }}>
-              Autofills verified ABHA #91-4820-1928-3012 for quick review
-            </div>
-          </div>
         </div>
 
         {/* Switch to Register */}

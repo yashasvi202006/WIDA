@@ -26,8 +26,26 @@ export const DoctorApp = ({ onLogout, initialSection = "dashboard" }) => {
             if (raw) {
                 const u = JSON.parse(raw);
                 if (u.role === 'doctor') {
-                    const match = doctorApi.getAllDoctors().find(d => d.email === u.email || d.id === (u.doctorId || u.id));
-                    if (match) return match;
+                    const match = doctorApi.getAllDoctors().find(d => d.email?.toLowerCase() === u.email?.toLowerCase() || d.id === (u.doctorId || u.id));
+                    if (match) {
+                        return {
+                            ...match,
+                            medicalRegistrationNumber: u.medicalRegistrationNumber || match.medicalRegistrationNumber,
+                            fullName: u.fullName || u.name || match.fullName,
+                        };
+                    }
+                    return {
+                        id: u.doctorId || u.id || Date.now(),
+                        fullName: u.fullName || u.name || 'Dr. Registered Practitioner',
+                        email: u.email,
+                        medicalRegistrationNumber: u.medicalRegistrationNumber || u.registeredId || `MCI-784912`,
+                        specializationName: u.specialization || u.specializationName || 'Clinical Specialist',
+                        hospitalClinicName: u.hospitalClinicName || 'WIDA Apex Medical Center',
+                        verificationStatus: 'VERIFIED',
+                        averageRating: 5.0,
+                        totalRatings: 1,
+                        profilePhotoUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150&auto=format&fit=crop&q=80',
+                    };
                 }
             }
         } catch {}
@@ -125,7 +143,7 @@ export const DoctorApp = ({ onLogout, initialSection = "dashboard" }) => {
     const renderSection = () => {
         switch (activeSection) {
             case "dashboard":
-                return (<DoctorDashboard summary={summary} onNavigate={setActiveSection} onAcceptAppointment={(id) => { doctorApi.updateAppointmentStatus(id, "ACCEPTED"); forceUpdate((n) => n + 1); }} onRejectAppointment={(id) => { doctorApi.updateAppointmentStatus(id, "REJECTED"); forceUpdate((n) => n + 1); }} onStartConsultationForAppointment={handleStartConsultationForAppointment} onOpenNewPrescription={handleOpenNewPrescription} onOpenNewTestRequest={handleOpenNewTestRequest}/>);
+                return (<DoctorDashboard doctor={doctor} summary={summary} onNavigate={setActiveSection} onAcceptAppointment={(id) => { doctorApi.updateAppointmentStatus(id, "ACCEPTED"); forceUpdate((n) => n + 1); }} onRejectAppointment={(id) => { doctorApi.updateAppointmentStatus(id, "REJECTED"); forceUpdate((n) => n + 1); }} onStartConsultationForAppointment={handleStartConsultationForAppointment} onOpenNewPrescription={handleOpenNewPrescription} onOpenNewTestRequest={handleOpenNewTestRequest}/>);
             case "appointments":
                 return <AppointmentsPage doctorId={doctor.id} onStartConsultation={handleStartConsultationForAppointment}/>;
             case "patients":

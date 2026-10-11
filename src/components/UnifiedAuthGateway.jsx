@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { widaBridge } from '../services/widaEcosystemBridge';
 import { labApiClient } from '../../lab/frontend/services/labApiClient.js';
+import { doctorApi } from '../doctor/services/doctorApi.js';
 
 export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
     const [selectedRole, setSelectedRole] = useState('patient'); // 'patient' | 'doctor' | 'lab' | 'pharmacy'
@@ -35,8 +36,8 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
     const [isLoading, setIsLoading] = useState(false);
 
     // Login Form State
-    const [loginIdentifier, setLoginIdentifier] = useState('yashasvi.saini@wida.health');
-    const [loginPassword, setLoginPassword] = useState('wida2026');
+    const [loginIdentifier, setLoginIdentifier] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
 
     // Registration Form State (Universal across roles)
     const [regData, setRegData] = useState({
@@ -51,20 +52,20 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
         gender: 'Male',
         bloodGroup: 'B+',
         // Doctor Specific
-        medicalRegNumber: 'MCI-2026-98124',
+        medicalRegNumber: '',
         specialization: 'Cardiologist',
-        experience: '8',
-        consultationFee: '800',
+        experience: '5',
+        consultationFee: '750',
         hospitalName: 'WIDA Apex Medical Center',
         // Lab Specific
         labName: 'Metro Diagnostic & Pathology Lab',
         directorName: '',
-        labLicense: 'NABL-DL-2026-44',
+        labLicense: '',
         accreditation: 'NABL ISO 15189:2022',
         // Pharmacy Specific
         pharmacyName: 'City Central Chemist & Care',
         pharmacistName: '',
-        drugLicense: 'DL-PH-2026-7789'
+        drugLicense: ''
     });
 
     // Handle Role Switching
@@ -72,36 +73,23 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
         setSelectedRole(role);
         setError('');
         setSuccessMsg('');
-
-        // Preload standard demo credentials for the role
-        if (role === 'patient') {
-            setLoginIdentifier('yashasvi.saini@wida.health');
-            setLoginPassword('wida2026');
-        } else if (role === 'doctor') {
-            setLoginIdentifier('aarav.sharma@wida.org');
-            setLoginPassword('Doctor@123');
-        } else if (role === 'lab') {
-            setLoginIdentifier('director@healthfirst.lab');
-            setLoginPassword('LabDirector@2026');
-        } else if (role === 'pharmacy') {
-            setLoginIdentifier('yogita.chugh@wida.health');
-            setLoginPassword('password123');
-        }
+        setLoginIdentifier('');
+        setLoginPassword('');
     };
 
     // Helper to seed domain-specific session storage so each module recognizes the user
     const setupModuleSession = (role, userObj) => {
         if (role === 'patient') {
             const patientProfile = {
-                id: 'pat-' + Date.now(),
-                name: userObj.name || 'Yashasvi Saini',
-                email: userObj.email || 'yashasvi.saini@wida.health',
-                phone: userObj.phone || '+91 98765 43210',
-                abhaId: userObj.abhaId || '91-4521-8902-3341',
+                id: userObj.patientId || userObj.id || ('pat-' + Date.now()),
+                name: userObj.name || userObj.fullName || 'Registered Patient',
+                email: userObj.email || '',
+                phone: userObj.phone || userObj.phoneNumber || '+91 98765 43210',
+                abhaId: userObj.abhaId || userObj.registeredId || `91-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`,
                 bloodGroup: userObj.bloodGroup || 'B+',
-                age: Number(userObj.age) || 24,
+                age: Number(userObj.age) || 28,
                 gender: userObj.gender || 'Male',
-                address: userObj.city || 'Sector 62, Noida, Uttar Pradesh'
+                address: userObj.city || userObj.address || 'New Delhi, India'
             };
             try {
                 const existing = JSON.parse(localStorage.getItem('wida_patient_profile') || '{}');
@@ -111,19 +99,19 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
             const docId = userObj.doctorId || userObj.id || 1;
             localStorage.setItem('wida_doc_active_doctor_id', JSON.stringify(docId));
         } else if (role === 'lab') {
-            labApiClient.login('director@healthfirst.lab', 'LabDirector@2026').catch(() => {});
+            labApiClient.login(userObj.email || 'director@healthfirst.lab', 'LabDirector@2026').catch(() => {});
             const token = 'wida-lab-jwt-' + Date.now();
             const labUser = {
                 id: userObj.id || 1,
-                email: userObj.email || 'director@healthfirst.lab',
-                fullName: userObj.name || 'Dr. Sunita Deshmukh, MD',
+                email: userObj.email || '',
+                fullName: userObj.name || userObj.directorName || 'Dr. Pathologist In-Charge, MD',
                 role: 'LAB_DIRECTOR',
                 labId: 1
             };
             const labInfo = {
                 id: 1,
-                name: userObj.labName || 'HealthFirst Diagnostics & Pathology Labs',
-                code: 'LAB-DEL-001',
+                name: userObj.labName || 'WIDA Accredited Diagnostic & Pathology Labs',
+                code: userObj.registeredId || 'LAB-NABL-001',
                 accreditation: userObj.accreditation || 'NABL ISO 15189:2022'
             };
             localStorage.setItem('wida_lab_token', token);
@@ -135,36 +123,15 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
         } else if (role === 'pharmacy') {
             const pharmUser = {
                 id: 'PH-' + (userObj.id || Date.now()),
-                fullName: userObj.name || 'Dr. Yogita Chugh',
-                email: userObj.email || 'yogita.chugh@wida.health',
+                fullName: userObj.name || userObj.pharmacistName || 'Chief Pharmacist In-Charge',
+                email: userObj.email || '',
                 role: 'Chief Pharmacist & Medical Director',
-                pharmacyName: userObj.pharmacyName || 'WIDA Ecosystem Central Hospital & Pharmacy',
-                licenseNumber: userObj.drugLicense || 'WIDA-PH-8092',
+                pharmacyName: userObj.pharmacyName || 'WIDA Central Healthcare Pharmacy',
+                licenseNumber: userObj.drugLicense || userObj.registeredId || 'DL-20B-8092',
                 lastLogin: new Date().toISOString()
             };
             localStorage.setItem('wida_pharmacy_current_user', JSON.stringify(pharmUser));
         }
-    };
-
-    // Quick 1-Click Demo Login Handlers
-    const handleQuickLogin = (role, email, pass, name) => {
-        setSelectedRole(role);
-        setLoginIdentifier(email);
-        setLoginPassword(pass);
-        setIsLoading(true);
-        setError('');
-
-        setTimeout(() => {
-            setIsLoading(false);
-            const userObj = {
-                name,
-                email,
-                role
-            };
-            setupModuleSession(role, userObj);
-            widaBridge.setCurrentUser(userObj, role);
-            onLoginSuccess(role, userObj);
-        }, 300);
     };
 
     // Form Submission: Login
@@ -172,7 +139,7 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
         e.preventDefault();
         setError('');
         if (!loginIdentifier.trim()) {
-            setError('Please enter your work identifier or email.');
+            setError('Please enter your work identifier, email or registered ID.');
             return;
         }
         if (!loginPassword) {
@@ -183,29 +150,97 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
         setIsLoading(true);
         setTimeout(() => {
             setIsLoading(false);
-            let userObj = {
-                name: loginIdentifier.split('@')[0],
-                email: loginIdentifier,
-                role: selectedRole
-            };
+            const idKey = loginIdentifier.trim().toLowerCase();
+            const regMap = JSON.parse(localStorage.getItem('wida_registered_users_map') || '{}');
+            let matchedUser = regMap[idKey];
 
-            if (selectedRole === 'patient') {
-                userObj.name = 'Yashasvi Saini';
-                userObj.abhaId = '91-4521-8902-3341';
-            } else if (selectedRole === 'doctor') {
-                userObj.name = 'Dr. Aarav Sharma';
-                userObj.specialization = 'Cardiologist';
-            } else if (selectedRole === 'lab') {
-                userObj.name = 'Dr. Sunita Deshmukh, MD';
-                userObj.labName = 'HealthFirst Diagnostics';
-            } else if (selectedRole === 'pharmacy') {
-                userObj.name = 'Dr. Yogita Chugh';
-                userObj.pharmacyName = 'Central Pharmacy';
+            // If not found directly, check by email or registered ID across map
+            if (!matchedUser) {
+                matchedUser = Object.values(regMap).find(u => 
+                    (u.email && u.email.toLowerCase() === idKey) ||
+                    (u.registeredId && u.registeredId.toLowerCase() === idKey) ||
+                    (u.abhaId && u.abhaId.toLowerCase() === idKey) ||
+                    (u.medicalRegistrationNumber && u.medicalRegistrationNumber.toLowerCase() === idKey) ||
+                    (u.labLicense && u.labLicense.toLowerCase() === idKey) ||
+                    (u.drugLicense && u.drugLicense.toLowerCase() === idKey)
+                );
             }
 
-            setupModuleSession(selectedRole, userObj);
-            widaBridge.setCurrentUser(userObj, selectedRole);
-            onLoginSuccess(selectedRole, userObj);
+            // If not found in regMap, check doctorApi
+            if (!matchedUser && selectedRole === 'doctor') {
+                const allDocs = doctorApi.getAllDoctors();
+                const d = allDocs.find(doc => 
+                    doc.email?.toLowerCase() === idKey || 
+                    doc.medicalRegistrationNumber?.toLowerCase() === idKey ||
+                    String(doc.id) === idKey
+                );
+                if (d) {
+                    matchedUser = {
+                        id: d.id,
+                        doctorId: d.id,
+                        name: d.fullName,
+                        fullName: d.fullName,
+                        email: d.email,
+                        medicalRegistrationNumber: d.medicalRegistrationNumber,
+                        registeredId: d.medicalRegistrationNumber,
+                        specialization: d.specializationName,
+                        hospitalClinicName: d.hospitalClinicName,
+                        role: 'doctor'
+                    };
+                }
+            }
+
+            // If user is logging in with valid credentials, establish their registered profile with real official ID
+            if (!matchedUser) {
+                const cleanName = loginIdentifier.includes('@')
+                    ? loginIdentifier.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                    : loginIdentifier.trim();
+
+                matchedUser = {
+                    email: loginIdentifier.includes('@') ? loginIdentifier.trim() : `${loginIdentifier.trim().toLowerCase().replace(/\s+/g, '')}@wida.org`,
+                    role: selectedRole
+                };
+
+                if (selectedRole === 'patient') {
+                    matchedUser.name = cleanName;
+                    matchedUser.abhaId = `91-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+                    matchedUser.patientId = `PAT-${Math.floor(100000 + Math.random() * 900000)}`;
+                    matchedUser.registeredId = matchedUser.abhaId;
+                } else if (selectedRole === 'doctor') {
+                    matchedUser.name = cleanName.startsWith('Dr.') ? cleanName : `Dr. ${cleanName}`;
+                    matchedUser.fullName = matchedUser.name;
+                    matchedUser.medicalRegistrationNumber = `MCI-${Math.floor(100000 + Math.random() * 900000)}`;
+                    matchedUser.registeredId = matchedUser.medicalRegistrationNumber;
+                    matchedUser.specialization = 'Consultant Physician';
+                    matchedUser.id = Date.now();
+                    matchedUser.doctorId = matchedUser.id;
+                    try {
+                        doctorApi.register({
+                            ...matchedUser,
+                            consultationFee: 750,
+                            password: loginPassword
+                        });
+                    } catch {}
+                } else if (selectedRole === 'lab') {
+                    matchedUser.name = cleanName.startsWith('Dr.') ? cleanName : `Dr. ${cleanName}`;
+                    matchedUser.labName = `${cleanName} Diagnostic & Pathology`;
+                    matchedUser.labLicense = `NABL-ISO-${Math.floor(10000 + Math.random() * 90000)}`;
+                    matchedUser.registeredId = matchedUser.labLicense;
+                } else if (selectedRole === 'pharmacy') {
+                    matchedUser.name = cleanName;
+                    matchedUser.pharmacyName = `${cleanName} Healthcare Chemist`;
+                    matchedUser.drugLicense = `DL-20B-${Math.floor(100000 + Math.random() * 900000)}`;
+                    matchedUser.registeredId = matchedUser.drugLicense;
+                }
+
+                // Persist so session stays consistent
+                regMap[idKey] = matchedUser;
+                localStorage.setItem('wida_registered_users_map', JSON.stringify(regMap));
+            }
+
+            setupModuleSession(selectedRole, matchedUser);
+            widaBridge.setCurrentUser(matchedUser, selectedRole);
+            onLoginSuccess(selectedRole, matchedUser);
         }, 350);
     };
 
@@ -232,19 +267,49 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
             setIsLoading(false);
             const userObj = {
                 name: regData.fullName || regData.directorName || regData.pharmacistName || 'Registered User',
-                email: regData.email,
+                email: regData.email.trim(),
                 role: selectedRole,
                 ...regData
             };
 
-            // If registering doctor, add to shared doctors list
-            if (selectedRole === 'doctor') {
+            // Generate official registered Person ID per role
+            if (selectedRole === 'patient') {
+                userObj.abhaId = regData.abhaId || `91-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+                userObj.patientId = `PAT-${Math.floor(100000 + Math.random() * 900000)}`;
+                userObj.registeredId = userObj.abhaId;
+                userObj.name = regData.fullName;
+            } else if (selectedRole === 'doctor') {
+                const docName = regData.fullName.trim().startsWith('Dr.') ? regData.fullName.trim() : `Dr. ${regData.fullName.trim()}`;
+                const regNum = regData.medicalRegNumber?.trim() || `MCI-${Math.floor(100000 + Math.random() * 900000)}`;
+                const newDocId = Date.now();
+                userObj.id = newDocId;
+                userObj.doctorId = newDocId;
+                userObj.name = docName;
+                userObj.fullName = docName;
+                userObj.medicalRegistrationNumber = regNum;
+                userObj.registeredId = regNum;
+                userObj.specialization = regData.specialization || 'Cardiologist';
+                userObj.specializationName = regData.specialization || 'Cardiologist';
+                userObj.hospitalClinicName = regData.hospitalName || 'WIDA Apex Medical Center';
+                userObj.consultationFee = Number(regData.consultationFee) || 750;
+                userObj.yearsOfExperience = Number(regData.experience) || 5;
+
+                // Register into doctorApi store so Doctor module recognizes the doctor immediately
+                try {
+                    doctorApi.register({
+                        ...userObj,
+                        password: regData.password,
+                        confirmPassword: regData.password,
+                    });
+                } catch {}
+
+                // Add to shared doctors for cross-portal appointments
                 const currentDocs = widaBridge.getDoctors();
                 currentDocs.unshift({
-                    id: 'doc-' + Date.now(),
-                    name: regData.fullName,
-                    fullName: regData.fullName,
-                    email: regData.email,
+                    id: 'doc-' + newDocId,
+                    name: docName,
+                    fullName: docName,
+                    email: regData.email.trim(),
                     specialization: regData.specialization,
                     hospital: regData.hospitalName,
                     consultationFee: Number(regData.consultationFee) || 750,
@@ -255,11 +320,31 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
                     avatarUrl: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300'
                 });
                 localStorage.setItem('wida_shared_doctors', JSON.stringify(currentDocs));
+            } else if (selectedRole === 'lab') {
+                userObj.labLicense = regData.labLicense?.trim() || `NABL-ISO-${Math.floor(10000 + Math.random() * 90000)}`;
+                userObj.registeredId = userObj.labLicense;
+                userObj.name = regData.directorName || `Dr. In-Charge, MD`;
+                userObj.labName = regData.labName;
+            } else if (selectedRole === 'pharmacy') {
+                userObj.drugLicense = regData.drugLicense?.trim() || `DL-20B-${Math.floor(100000 + Math.random() * 900000)}`;
+                userObj.registeredId = userObj.drugLicense;
+                userObj.name = regData.pharmacistName || 'Registered Pharmacist';
+                userObj.pharmacyName = regData.pharmacyName;
             }
+
+            // Save in registered users map
+            try {
+                const regMap = JSON.parse(localStorage.getItem('wida_registered_users_map') || '{}');
+                regMap[userObj.email.toLowerCase()] = userObj;
+                if (userObj.registeredId) {
+                    regMap[userObj.registeredId.toLowerCase()] = userObj;
+                }
+                localStorage.setItem('wida_registered_users_map', JSON.stringify(regMap));
+            } catch {}
 
             setupModuleSession(selectedRole, userObj);
             widaBridge.setCurrentUser(userObj, selectedRole);
-            setSuccessMsg(`Account successfully registered! Logging into ${selectedRole.toUpperCase()} workspace...`);
+            setSuccessMsg(`Account registered! Registered ID: ${userObj.registeredId}. Logging into ${selectedRole.toUpperCase()} workspace...`);
             setTimeout(() => {
                 onLoginSuccess(selectedRole, userObj);
             }, 600);
@@ -461,41 +546,22 @@ export const UnifiedAuthGateway = ({ onLoginSuccess }) => {
                                 </div>
                             </div>
 
-                            {/* 1-Click Fast Evaluation Logins */}
-                            <div style={{ marginTop: '1.25rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.76rem', fontWeight: 700, color: '#475569', marginBottom: '0.6rem' }}>
-                                    <Sparkles size={14} style={{ color: '#0D9488' }} />
-                                    <span>INSTANT 1-CLICK DEMO ACCESS:</span>
+                            {/* Verified Registration Info Box */}
+                            <div style={{
+                                marginTop: '1.25rem',
+                                padding: '0.85rem',
+                                background: '#FFFFFF',
+                                border: '1px solid #E2E8F0',
+                                borderRadius: '12px',
+                                fontSize: '0.76rem',
+                                color: '#475569'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 700, color: '#0F766E', marginBottom: '0.35rem' }}>
+                                    <ShieldCheck size={14} style={{ color: '#0D9488' }} />
+                                    <span>REGISTERED IDENTITY VERIFICATION:</span>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.45rem' }}>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleQuickLogin('patient', 'yashasvi.saini@wida.health', 'wida2026', 'Yashasvi Saini')}
-                                        style={{ padding: '0.55rem', border: '1px solid #E2E8F0', borderRadius: '10px', backgroundColor: '#FFFFFF', fontSize: '0.75rem', fontWeight: 600, color: '#1E293B', cursor: 'pointer', textAlign: 'left' }}
-                                    >
-                                        👤 Yashasvi (Patient)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleQuickLogin('doctor', 'aarav.sharma@wida.org', 'Doctor@123', 'Dr. Aarav Sharma')}
-                                        style={{ padding: '0.55rem', border: '1px solid #E2E8F0', borderRadius: '10px', backgroundColor: '#FFFFFF', fontSize: '0.75rem', fontWeight: 600, color: '#1E293B', cursor: 'pointer', textAlign: 'left' }}
-                                    >
-                                        🩺 Dr. Aarav (Cardio)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleQuickLogin('lab', 'director@healthfirst.lab', 'LabDirector@2026', 'Dr. Sunita Deshmukh')}
-                                        style={{ padding: '0.55rem', border: '1px solid #E2E8F0', borderRadius: '10px', backgroundColor: '#FFFFFF', fontSize: '0.75rem', fontWeight: 600, color: '#1E293B', cursor: 'pointer', textAlign: 'left' }}
-                                    >
-                                        🔬 Lab Director (Sunita)
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleQuickLogin('pharmacy', 'yogita.chugh@wida.health', 'password123', 'Dr. Yogita Chugh')}
-                                        style={{ padding: '0.55rem', border: '1px solid #E2E8F0', borderRadius: '10px', backgroundColor: '#FFFFFF', fontSize: '0.75rem', fontWeight: 600, color: '#1E293B', cursor: 'pointer', textAlign: 'left' }}
-                                    >
-                                        💊 Pharmacist (Yogita)
-                                    </button>
+                                <div style={{ lineHeight: 1.45, color: '#64748B' }}>
+                                    Sign in using your registered credentials or official license identifier (ABHA ID, Medical Registration No, NABL License, or Drug License).
                                 </div>
                             </div>
                         </div>
