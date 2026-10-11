@@ -8,10 +8,10 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] })
   ],
   preview: {
-    allowedHosts: true,
+    allowedHosts: ['wida.onrender.com', '.onrender.com', 'localhost', '127.0.0.1'],
   },
   server: {
-    allowedHosts: true,
+    allowedHosts: ['wida.onrender.com', '.onrender.com', 'localhost', '127.0.0.1'],
     proxy: {
       '/api/lab': {
         target: 'http://127.0.0.1:8082',
