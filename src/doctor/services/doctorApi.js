@@ -316,7 +316,37 @@ export const doctorApi = {
     },
     // Appointments
     getAppointments(doctorId, filter) {
-        let list = store.appointments.filter((a) => a.doctorId === doctorId);
+        let allAppointments = [...store.appointments];
+        try {
+            const rawShared = localStorage.getItem('wida_shared_appointments');
+            if (rawShared) {
+                const shared = JSON.parse(rawShared);
+                shared.forEach((sh) => {
+                    const parsedDocId = typeof sh.doctorId === 'number' ? sh.doctorId : (parseInt(String(sh.doctorId).replace(/\D/g, ''), 10) || 1);
+                    if (!allAppointments.some(a => a.id === sh.id || a.appointmentNumber === sh.appointmentNumber)) {
+                        allAppointments.unshift({
+                            id: sh.id,
+                            appointmentNumber: sh.appointmentNumber || ('APT-' + String(sh.id).slice(-4)),
+                            doctorId: parsedDocId,
+                            patientId: sh.patientId || 'PID-2026-901',
+                            patientName: sh.patientName || 'Yashasvi Saini',
+                            patientAge: sh.patientAge || 24,
+                            patientGender: sh.patientGender || 'MALE',
+                            patientPhone: sh.patientPhone || '+91 98765 43210',
+                            appointmentDate: sh.date || new Date().toISOString().slice(0, 10),
+                            appointmentTime: sh.time || '10:30 AM',
+                            timeSlot: sh.time || '10:30 AM',
+                            status: sh.status === 'CONFIRMED' ? 'ACCEPTED' : (sh.status || 'PENDING'),
+                            consultationType: sh.type === 'Online' ? 'TELECONSULT' : 'IN_PERSON',
+                            reasonForVisit: sh.reason || 'Continuity Healthcare Consultation',
+                            tokenNumber: 'TK-' + String(sh.id).slice(-2)
+                        });
+                    }
+                });
+            }
+        } catch {}
+
+        let list = allAppointments.filter((a) => a.doctorId === doctorId || !doctorId);
         if (filter?.status) {
             list = list.filter((a) => a.status === filter.status);
         }
@@ -541,7 +571,7 @@ export const doctorApi = {
     getDashboardSummary(doctorId) {
         const doc = store.getCurrentDoctor();
         const today = new Date().toISOString().slice(0, 10);
-        const docApts = store.appointments.filter((a) => a.doctorId === doctorId);
+        const docApts = this.getAppointments(doctorId);
         const todaySchedule = docApts.filter((a) => a.appointmentDate === today);
         const pendingRequests = docApts.filter((a) => a.status === 'PENDING');
         const upcomingAppointments = docApts.filter((a) => a.appointmentDate > today);

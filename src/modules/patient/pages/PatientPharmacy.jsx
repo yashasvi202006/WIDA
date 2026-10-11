@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PharmacyOrderCard } from '../components/PharmacyOrderCard';
-import { Store, Pill, Clock, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { Store, Pill, Clock, ShoppingBag, ShieldCheck, ExternalLink } from 'lucide-react';
+import { widaBridge } from '../../../services/widaEcosystemBridge';
 export const PatientPharmacy = ({ orders, prescriptions, onOrderPrescription }) => {
     const [tab, setTab] = useState('orders');
     return (<div className="patient-pharmacy d-flex flex-column gap-4">
@@ -12,9 +13,22 @@ export const PatientPharmacy = ({ orders, prescriptions, onOrderPrescription }) 
           </p>
         </div>
 
-        <span className="patient-badge patient-badge-teal py-2 px-3">
-          <ShieldCheck size={14}/> GPP Compliant Licensed Pharmacies
-        </span>
+        <div className="d-flex align-items-center gap-2">
+          <span className="patient-badge patient-badge-teal py-2 px-3">
+            <ShieldCheck size={14}/> GPP Compliant Licensed Pharmacies
+          </span>
+          <button
+            type="button"
+            className="patient-btn patient-btn-outline py-2 px-3 d-flex align-items-center gap-2"
+            style={{ borderColor: '#16A34A', color: '#16A34A', fontWeight: 700 }}
+            onClick={() => widaBridge.switchPortal('pharmacy')}
+            title="Launch WIDA Central Pharmacy Module"
+          >
+            <Pill size={15} />
+            <span>Open Pharmacy Portal</span>
+            <ExternalLink size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Navigation Tabs */}

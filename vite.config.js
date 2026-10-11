@@ -9,10 +9,18 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/api/lab': {
+        target: 'http://127.0.0.1:8082',
+        changeOrigin: true,
+      },
+      '/api/doctor': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:8080',
-        changeOrigin: true
-      }
-    }
+        changeOrigin: true,
+      },
+    },
   }
 });

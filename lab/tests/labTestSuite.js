@@ -125,13 +125,14 @@ async function runAllTests() {
         const testBarcode = 'SMP-TEST-' + Math.floor(1000 + Math.random() * 9000);
         const now = new Date().toISOString();
 
+        const testRef = 'BK-TEST-' + Date.now();
         labDb.run(`
             INSERT INTO test_bookings (
                 id, booking_reference, lab_id, patient_id, patient_name, patient_phone, patient_age,
                 patient_gender, test_ids, test_names, collection_type, appointment_date, appointment_time,
                 status, payment_status, total_amount, created_at, updated_at
-            ) VALUES (?, 'BK-TEST-99', 'lab-01', 'pat-001', 'Yashasvi Saini', '+91 98765 43210', 24, 'Male', '["t-01"]', 'Complete Blood Count', 'Lab Visit', '2026-10-15', '10:00 AM', 'BOOKED', 'PENDING', 399.00, ?, ?)
-        `, [testBookingId, now, now]);
+            ) VALUES (?, ?, 'lab-01', 'pat-001', 'Yashasvi Saini', '+91 98765 43210', 24, 'Male', '["t-01"]', 'Complete Blood Count', 'Lab Visit', '2026-10-15', '10:00 AM', 'BOOKED', 'PENDING', 399.00, ?, ?)
+        `, [testBookingId, testRef, now, now]);
 
         labDb.run(`
             INSERT INTO samples (
@@ -167,10 +168,11 @@ async function runAllTests() {
     console.log('\n[Suite 7: Specimen Quality Check & Rejection]');
     try {
         const testSampleId = 'smp-rej-' + Date.now();
+        const testBarcode = 'SMP-REJ-' + Date.now();
         labDb.run(`
             INSERT INTO samples (id, sample_barcode, booking_id, lab_id, patient_name, test_name, sample_type, tube_color, collection_timestamp, collected_by, condition, processing_status, created_at, updated_at)
-            VALUES (?, 'SMP-REJ-99', 'book-101', 'lab-01', 'Test Patient', 'Lipid Profile', 'Serum', 'Gold', datetime('now'), 'Phlebo', 'ACCEPTED', 'ACCESSIONED', datetime('now'), datetime('now'))
-        `, [testSampleId]);
+            VALUES (?, ?, 'book-101', 'lab-01', 'Test Patient', 'Lipid Profile', 'Serum', 'Gold', datetime('now'), 'Phlebo', 'ACCEPTED', 'ACCESSIONED', datetime('now'), datetime('now'))
+        `, [testSampleId, testBarcode]);
 
         labDb.run("UPDATE samples SET condition = 'REJECTED', rejection_reason = 'Specimen Hemolyzed' WHERE id = ?", [testSampleId]);
         const rejected = labDb.get('SELECT condition, rejection_reason FROM samples WHERE id = ?', [testSampleId]);
@@ -218,10 +220,11 @@ async function runAllTests() {
     console.log('\n[Suite 10: Traceable Versioned Amendments]');
     try {
         const testRepId = 'rep-amend-' + Date.now();
+        const testRepNum = 'REP-AM-' + Date.now();
         labDb.run(`
             INSERT INTO diagnostic_reports (id, report_number, booking_id, sample_id, lab_id, patient_id, patient_name, patient_age, patient_gender, doctor_name, test_name, collection_date, reporting_date, status, is_verified, amendment_version, created_at, updated_at)
-            VALUES (?, 'REP-AM-99', 'book-101', 'smp-101', 'lab-01', 'pat-001', 'Yashasvi Saini', 24, 'Male', 'Dr. Sharma', 'CBC', '2026-10-10', '2026-10-10', 'PUBLISHED', 1, 1, datetime('now'), datetime('now'))
-        `, [testRepId]);
+            VALUES (?, ?, 'book-101', 'smp-101', 'lab-01', 'pat-001', 'Yashasvi Saini', 24, 'Male', 'Dr. Sharma', 'CBC', '2026-10-10', '2026-10-10', 'PUBLISHED', 1, 1, datetime('now'), datetime('now'))
+        `, [testRepId, testRepNum]);
 
         // Issue amendment v2
         labDb.run("UPDATE diagnostic_reports SET amendment_version = 2, amendment_reason = 'Instrument calibrator adjustment run' WHERE id = ?", [testRepId]);

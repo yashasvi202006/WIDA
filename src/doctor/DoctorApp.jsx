@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import "./doctor.css";
 import { doctorApi } from "./services/doctorApi.js";
 // Components
@@ -19,10 +19,22 @@ import { AvailabilityPage } from "./pages/AvailabilityPage.jsx";
 import { RatingsPage } from "./pages/RatingsPage.jsx";
 import { NotificationsPage } from "./pages/NotificationsPage.jsx";
 import { SettingsPage } from "./pages/SettingsPage.jsx";
-export const DoctorApp = () => {
-    const [authState, setAuthState] = useState("login");
-    const [activeSection, setActiveSection] = useState("dashboard");
-    const [currentDoctor, setCurrentDoctor] = useState(null);
+export const DoctorApp = ({ onLogout, initialSection = "dashboard" }) => {
+    const [currentDoctor, setCurrentDoctor] = useState(() => {
+        try {
+            const raw = localStorage.getItem('wida_ecosystem_user');
+            if (raw) {
+                const u = JSON.parse(raw);
+                if (u.role === 'doctor') {
+                    const match = doctorApi.getAllDoctors().find(d => d.email === u.email || d.id === (u.doctorId || u.id));
+                    if (match) return match;
+                }
+            }
+        } catch {}
+        return doctorApi.getCurrentDoctor() || doctorApi.getAllDoctors()[0];
+    });
+    const [authState, setAuthState] = useState("app");
+    const [activeSection, setActiveSection] = useState(initialSection || "dashboard");
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     // Cross-section navigation state
     const [prefillApt, setPrefillApt] = useState(null);
@@ -30,6 +42,22 @@ export const DoctorApp = () => {
     const [prefillPrescriptionPatient, setPrefillPrescriptionPatient] = useState(null);
     const [prefillDiagnosticPatient, setPrefillDiagnosticPatient] = useState(null);
     const [, forceUpdate] = useState(0);
+
+    // Ensure dashboard is always active upon login or portal switch
+    useEffect(() => {
+        setActiveSection(initialSection || "dashboard");
+    }, [currentDoctor?.id, initialSection]);
+
+    useEffect(() => {
+        const handleGlobalPortalSwitch = (e) => {
+            if (e.detail?.portal === 'doctor') {
+                setActiveSection(e.detail?.section || "dashboard");
+            }
+        };
+        window.addEventListener('wida:switch-portal', handleGlobalPortalSwitch);
+        return () => window.removeEventListener('wida:switch-portal', handleGlobalPortalSwitch);
+    }, []);
+
     const handleLoginSuccess = useCallback((doc) => {
         setCurrentDoctor(doc);
         setAuthState("app");
@@ -38,14 +66,18 @@ export const DoctorApp = () => {
     const handleRegisterSuccess = useCallback((doc) => {
         setCurrentDoctor(doc);
         setAuthState("app");
-        setActiveSection("profile");
+        setActiveSection("dashboard");
     }, []);
     const handleLogout = useCallback(() => {
+        if (onLogout) {
+            onLogout();
+            return;
+        }
         setCurrentDoctor(null);
         setAuthState("login");
         setPrefillApt(null);
         setPrefillPatient(null);
-    }, []);
+    }, [onLogout]);
     const handleSwitchDoctor = useCallback((id) => {
         const doc = doctorApi.switchDoctor(id);
         setCurrentDoctor(doc);

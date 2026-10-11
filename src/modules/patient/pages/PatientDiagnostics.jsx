@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { DiagnosticCard } from '../components/DiagnosticCard';
 import { LabReportCard } from '../components/LabReportCard';
-import { FlaskConical, FileCheck, Calendar, Check, X, Search, ShieldCheck } from 'lucide-react';
+import { FlaskConical, FileCheck, Calendar, Check, X, Search, ShieldCheck, Microscope, ExternalLink } from 'lucide-react';
+import { widaBridge } from '../../../services/widaEcosystemBridge';
 export const PatientDiagnostics = ({ tests, labs, reports, bookings, onBookTest, onSimulateReportReady }) => {
     const [activeTab, setActiveTab] = useState('tests');
     const [search, setSearch] = useState('');
@@ -38,10 +39,21 @@ export const PatientDiagnostics = ({ tests, labs, reports, bookings, onBookTest,
           </p>
         </div>
 
-        <div className="d-flex gap-2">
+        <div className="d-flex align-items-center gap-2">
           <span className="patient-badge patient-badge-teal py-2 px-3">
             <ShieldCheck size={14}/> NABL & CAP Accredited Labs
           </span>
+          <button
+            type="button"
+            className="patient-btn patient-btn-outline py-2 px-3 d-flex align-items-center gap-2"
+            style={{ borderColor: '#0D9488', color: '#0D9488', fontWeight: 700 }}
+            onClick={() => widaBridge.switchPortal('lab')}
+            title="Launch WIDA Diagnostic Laboratory Module"
+          >
+            <Microscope size={15} />
+            <span>Open Lab Portal</span>
+            <ExternalLink size={13} />
+          </button>
         </div>
       </div>
 
