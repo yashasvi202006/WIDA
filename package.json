@@ -8,6 +8,7 @@
     "dev:pharmacy": "vite --config vite.pharmacy.config.js",
     "build": "vite build",
     "build:pharmacy": "vite build --config vite.pharmacy.config.js",
+    "start": "vite preview --host 0.0.0.0 --port ${PORT:-10000}",
     "lint": "eslint .",
     "preview": "vite preview"
   },

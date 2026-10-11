@@ -7,7 +7,11 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  preview: {
+    allowedHosts: true,
+  },
   server: {
+    allowedHosts: true,
     proxy: {
       '/api/lab': {
         target: 'http://127.0.0.1:8082',
