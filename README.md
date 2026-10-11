@@ -1,6 +1,7 @@
 # WIDA — Integrated Digital Healthcare Ecosystem
 ### Next-Generation Connected Health Platform: Patient, Doctor, Diagnostic Laboratory & Pharmacy Modules
 
+[![Render Status](https://img.shields.io/badge/Render-Live%20Production-46E3B7?style=flat&logo=render&logoColor=white)](https://wida.onrender.com)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e8cfdf92-6298-4c90-95e2-2a2b72445e99/deploy-status)](https://wida-health.netlify.app)
 [![Vite](https://img.shields.io/badge/Vite-8.3.3-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.2.8-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
@@ -64,12 +65,12 @@
 
 ---
 
-## 🚀 Live Netlify Deployment & Quick Access
+## 🚀 Live Cloud Deployment & Quick Access
 
-The WIDA application is deployed as a high-performance Single Page Application (SPA) on Netlify with automated continuous deployment and edge routing:
+The WIDA application is deployed live with automated continuous integration and edge routing:
 
-🔗 **Live Production URL:** [https://wida-health.netlify.app](https://wida-health.netlify.app)  
-*(If using your team's specific Netlify subdomain, open `https://<your-site-name>.netlify.app`)*
+🔗 **Live Primary URL (Render):** [https://wida.onrender.com](https://wida.onrender.com)  
+🔗 **Live Mirror URL (Netlify):** [https://wida-health.netlify.app](https://wida-health.netlify.app)
 
 ### Direct Portal Deep-Links
 
