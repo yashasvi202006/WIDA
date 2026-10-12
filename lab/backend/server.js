@@ -337,20 +337,20 @@ const server = http.createServer(async (req, res) => {
 
         // GET /api/lab/dashboard/summary
         if (pathname === '/api/lab/dashboard/summary' && method === 'GET') {
-            // Metrics queried directly from database (honest statistics)
-            const totalBookings = labDb.get('SELECT COUNT(*) as count FROM test_bookings WHERE lab_id = ?', [currentLabId])?.count || 0;
-            const pendingCollections = labDb.get("SELECT COUNT(*) as count FROM test_bookings WHERE lab_id = ? AND status IN ('BOOKED', 'CONFIRMED', 'SAMPLE_PENDING')", [currentLabId])?.count || 0;
-            const samplesReceived = labDb.get("SELECT COUNT(*) as count FROM samples WHERE lab_id = ? AND condition = 'ACCEPTED'", [currentLabId])?.count || 0;
-            const inProcessing = labDb.get("SELECT COUNT(*) as count FROM test_bookings WHERE lab_id = ? AND status = 'PROCESSING'", [currentLabId])?.count || 0;
-            const awaitingVerification = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE lab_id = ? AND status = 'PENDING_VERIFICATION'", [currentLabId])?.count || 0;
-            const publishedReports = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE lab_id = ? AND status = 'PUBLISHED'", [currentLabId])?.count || 0;
+            // Metrics queried directly from database (honest statistics combining demo feed + real inputs)
+            const totalBookings = labDb.get(`SELECT COUNT(*) as count FROM test_bookings WHERE (lab_id = ? OR lab_id = 'lab-01')`, [currentLabId])?.count || 0;
+            const pendingCollections = labDb.get("SELECT COUNT(*) as count FROM test_bookings WHERE (lab_id = ? OR lab_id = 'lab-01') AND status IN ('BOOKED', 'CONFIRMED', 'SAMPLE_PENDING')", [currentLabId])?.count || 0;
+            const samplesReceived = labDb.get("SELECT COUNT(*) as count FROM samples WHERE (lab_id = ? OR lab_id = 'lab-01') AND condition = 'ACCEPTED'", [currentLabId])?.count || 0;
+            const inProcessing = labDb.get("SELECT COUNT(*) as count FROM test_bookings WHERE (lab_id = ? OR lab_id = 'lab-01') AND status = 'PROCESSING'", [currentLabId])?.count || 0;
+            const awaitingVerification = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE (lab_id = ? OR lab_id = 'lab-01') AND status = 'PENDING_VERIFICATION'", [currentLabId])?.count || 0;
+            const publishedReports = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE (lab_id = ? OR lab_id = 'lab-01') AND status = 'PUBLISHED'", [currentLabId])?.count || 0;
             
             // Completed today
             const todayStr = new Date().toISOString().split('T')[0];
-            const completedToday = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE lab_id = ? AND status = 'PUBLISHED' AND reporting_date >= ?", [currentLabId, todayStr])?.count || 0;
+            const completedToday = labDb.get("SELECT COUNT(*) as count FROM diagnostic_reports WHERE (lab_id = ? OR lab_id = 'lab-01') AND status = 'PUBLISHED' AND reporting_date >= ?", [currentLabId, todayStr])?.count || 0;
 
             // Revenue and outstanding amounts
-            const revenueRow = labDb.get("SELECT SUM(amount_paid) as totalRevenue, SUM(balance_due) as totalOutstanding FROM invoices WHERE lab_id = ?", [currentLabId]);
+            const revenueRow = labDb.get("SELECT SUM(amount_paid) as totalRevenue, SUM(balance_due) as totalOutstanding FROM invoices WHERE (lab_id = ? OR lab_id = 'lab-01')", [currentLabId]);
             const totalRevenue = revenueRow?.totalRevenue || 0.0;
             const totalOutstanding = revenueRow?.totalOutstanding || 0.0;
 
@@ -358,25 +358,25 @@ const server = http.createServer(async (req, res) => {
             const statusBreakdown = labDb.query(`
                 SELECT status, COUNT(*) as count 
                 FROM test_bookings 
-                WHERE lab_id = ? 
+                WHERE (lab_id = ? OR lab_id = 'lab-01') 
                 GROUP BY status
             `, [currentLabId]);
 
-            // Recent 6 bookings
+            // Recent bookings (demo feed + real walk-ins)
             const recentBookings = labDb.query(`
                 SELECT id, booking_reference, patient_name, patient_age, patient_gender, test_names, collection_type, appointment_date, appointment_time, status, payment_status, total_amount
                 FROM test_bookings
-                WHERE lab_id = ?
+                WHERE (lab_id = ? OR lab_id = 'lab-01')
                 ORDER BY created_at DESC
-                LIMIT 6
+                LIMIT 8
             `, [currentLabId]);
 
             // Reports awaiting verification (clinical urgency)
             const urgentReports = labDb.query(`
                 SELECT id, report_number, patient_name, test_name, reporting_date, clinical_interpretation, status
                 FROM diagnostic_reports
-                WHERE lab_id = ? AND status = 'PENDING_VERIFICATION'
-                LIMIT 4
+                WHERE (lab_id = ? OR lab_id = 'lab-01') AND status = 'PENDING_VERIFICATION'
+                LIMIT 6
             `, [currentLabId]);
 
             return sendJson(res, 200, {
@@ -407,7 +407,7 @@ const server = http.createServer(async (req, res) => {
             const category = query.category || '';
             const search = (query.search || '').trim().toLowerCase();
 
-            let sql = 'SELECT * FROM test_catalogue WHERE lab_id = ?';
+            let sql = `SELECT * FROM test_catalogue WHERE (lab_id = ? OR lab_id = 'lab-01')`;
             const params = [currentLabId];
 
             if (category) {
@@ -516,7 +516,7 @@ const server = http.createServer(async (req, res) => {
 
         // GET /api/lab/packages
         if (pathname === '/api/lab/packages' && method === 'GET') {
-            const packages = labDb.query('SELECT * FROM test_packages WHERE lab_id = ? ORDER BY price ASC', [currentLabId]);
+            const packages = labDb.query(`SELECT * FROM test_packages WHERE (lab_id = ? OR lab_id = 'lab-01') ORDER BY price ASC`, [currentLabId]);
             
             // Enrich with included tests
             const enriched = packages.map(pkg => {
@@ -545,7 +545,7 @@ const server = http.createServer(async (req, res) => {
             const status = query.status || '';
             const search = (query.search || '').trim().toLowerCase();
 
-            let sql = 'SELECT * FROM test_bookings WHERE lab_id = ?';
+            let sql = `SELECT * FROM test_bookings WHERE (lab_id = ? OR lab_id = 'lab-01')`;
             const params = [currentLabId];
 
             if (status) {
@@ -745,7 +745,7 @@ const server = http.createServer(async (req, res) => {
                 SELECT s.*, b.booking_reference, b.appointment_date, b.collection_type
                 FROM samples s
                 JOIN test_bookings b ON s.booking_id = b.id
-                WHERE s.lab_id = ?
+                WHERE (s.lab_id = ? OR s.lab_id = 'lab-01')
                 ORDER BY s.created_at DESC
             `, [currentLabId]);
 
@@ -816,7 +816,7 @@ const server = http.createServer(async (req, res) => {
         // GET /api/lab/reports
         if (pathname === '/api/lab/reports' && method === 'GET') {
             const status = query.status || '';
-            let sql = 'SELECT * FROM diagnostic_reports WHERE lab_id = ?';
+            let sql = `SELECT * FROM diagnostic_reports WHERE (lab_id = ? OR lab_id = 'lab-01')`;
             const params = [currentLabId];
 
             if (status) {
@@ -843,13 +843,13 @@ const server = http.createServer(async (req, res) => {
         // GET /api/lab/reports/:id
         if (pathname.match(/^\/api\/lab\/reports\/[^/]+$/) && method === 'GET') {
             const reportId = pathname.split('/')[4];
-            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE id = ? AND lab_id = ?', [reportId, currentLabId]);
+            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE (id = ? OR report_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [reportId, reportId, currentLabId]);
             if (!report) {
                 return sendError(res, 404, 'Diagnostic report not found');
             }
 
-            const parameters = labDb.query('SELECT * FROM report_parameters WHERE report_id = ? ORDER BY display_order ASC', [reportId]);
-            const auditLog = labDb.query('SELECT * FROM report_audit_log WHERE report_id = ? ORDER BY timestamp DESC', [reportId]);
+            const parameters = labDb.query('SELECT * FROM report_parameters WHERE report_id = ? ORDER BY display_order ASC', [report.id]);
+            const auditLog = labDb.query('SELECT * FROM report_audit_log WHERE report_id = ? ORDER BY timestamp DESC', [report.id]);
 
             return sendJson(res, 200, {
                 success: true,
@@ -867,7 +867,7 @@ const server = http.createServer(async (req, res) => {
             const body = await parseJsonBody(req);
             const { parameters, clinicalInterpretation, submitForVerification } = body;
 
-            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE id = ? AND lab_id = ?', [reportId, currentLabId]);
+            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE (id = ? OR report_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [reportId, reportId, currentLabId]);
             if (!report) {
                 return sendError(res, 404, 'Diagnostic report not found');
             }
@@ -940,7 +940,7 @@ const server = http.createServer(async (req, res) => {
             }
 
             const reportId = pathname.split('/')[4];
-            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE id = ? AND lab_id = ?', [reportId, currentLabId]);
+            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE (id = ? OR report_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [reportId, reportId, currentLabId]);
             if (!report) {
                 return sendError(res, 404, 'Diagnostic report not found');
             }
@@ -952,12 +952,12 @@ const server = http.createServer(async (req, res) => {
                 UPDATE diagnostic_reports 
                 SET status = 'VERIFIED', is_verified = 1, verified_by = ?, verified_at = ?, updated_at = ?
                 WHERE id = ?
-            `, [verifierSignature, now, now, reportId]);
+            `, [verifierSignature, now, now, report.id]);
 
             labDb.run(`
                 INSERT INTO report_audit_log (id, report_id, action, performed_by, role, details, timestamp)
                 VALUES (?, ?, 'VERIFIED', ?, ?, 'Clinical validation passed and certified by pathologist', ?)
-            `, ['audit-' + Date.now(), reportId, currentUser.name, currentUser.role, now]);
+            `, ['audit-' + Date.now(), report.id, currentUser.name, currentUser.role, now]);
 
             return sendJson(res, 200, {
                 success: true,
@@ -975,7 +975,7 @@ const server = http.createServer(async (req, res) => {
             }
 
             const reportId = pathname.split('/')[4];
-            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE id = ? AND lab_id = ?', [reportId, currentLabId]);
+            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE (id = ? OR report_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [reportId, reportId, currentLabId]);
             if (!report) {
                 return sendError(res, 404, 'Diagnostic report not found');
             }
@@ -987,7 +987,7 @@ const server = http.createServer(async (req, res) => {
                 UPDATE diagnostic_reports 
                 SET status = 'PUBLISHED', is_verified = 1, verified_by = ?, verified_at = COALESCE(verified_at, ?), reporting_date = ?, updated_at = ?
                 WHERE id = ?
-            `, [verifierSignature, now, now.split('T')[0], now, reportId]);
+            `, [verifierSignature, now, now.split('T')[0], now, report.id]);
 
             // Update Booking Status to REPORT_PUBLISHED
             labDb.run(`UPDATE test_bookings SET status = 'REPORT_PUBLISHED', updated_at = ? WHERE id = ?`, [now, report.booking_id]);
@@ -995,7 +995,7 @@ const server = http.createServer(async (req, res) => {
             labDb.run(`
                 INSERT INTO report_audit_log (id, report_id, action, performed_by, role, details, timestamp)
                 VALUES (?, ?, 'PUBLISHED', ?, ?, 'Report published and made available to patient portal and ordering physician', ?)
-            `, ['audit-' + Date.now(), reportId, currentUser.name, currentUser.role, now]);
+            `, ['audit-' + Date.now(), report.id, currentUser.name, currentUser.role, now]);
 
             return sendJson(res, 200, {
                 success: true,
@@ -1018,7 +1018,7 @@ const server = http.createServer(async (req, res) => {
                 return sendError(res, 400, 'Clinical amendment reason is mandatory for regulatory compliance');
             }
 
-            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE id = ? AND lab_id = ?', [reportId, currentLabId]);
+            const report = labDb.get('SELECT * FROM diagnostic_reports WHERE (id = ? OR report_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [reportId, reportId, currentLabId]);
             if (!report) {
                 return sendError(res, 404, 'Diagnostic report not found');
             }
@@ -1030,12 +1030,12 @@ const server = http.createServer(async (req, res) => {
                 UPDATE diagnostic_reports 
                 SET amendment_version = ?, amendment_reason = ?, clinical_interpretation = COALESCE(?, clinical_interpretation), updated_at = ?
                 WHERE id = ?
-            `, [newVersion, amendmentReason, revisedConclusion, now, reportId]);
+            `, [newVersion, amendmentReason, revisedConclusion, now, report.id]);
 
             labDb.run(`
                 INSERT INTO report_audit_log (id, report_id, action, performed_by, role, details, timestamp)
                 VALUES (?, ?, 'AMENDED', ?, ?, ?, ?)
-            `, ['audit-' + Date.now(), reportId, currentUser.name, currentUser.role, `Version ${newVersion} issued. Reason: ${amendmentReason}`, now]);
+            `, ['audit-' + Date.now(), report.id, currentUser.name, currentUser.role, `Version ${newVersion} issued. Reason: ${amendmentReason}`, now]);
 
             return sendJson(res, 200, {
                 success: true,
@@ -1054,7 +1054,7 @@ const server = http.createServer(async (req, res) => {
                 SELECT i.*, b.booking_reference, b.test_names
                 FROM invoices i
                 JOIN test_bookings b ON i.booking_id = b.id
-                WHERE i.lab_id = ?
+                WHERE (i.lab_id = ? OR i.lab_id = 'lab-01')
                 ORDER BY i.created_at DESC
             `, [currentLabId]);
 
@@ -1068,12 +1068,12 @@ const server = http.createServer(async (req, res) => {
         // GET /api/lab/billing/invoices/:id
         if (pathname.match(/^\/api\/lab\/billing\/invoices\/[^/]+$/) && method === 'GET') {
             const invoiceId = pathname.split('/')[5];
-            const invoice = labDb.get('SELECT * FROM invoices WHERE id = ? AND lab_id = ?', [invoiceId, currentLabId]);
+            const invoice = labDb.get('SELECT * FROM invoices WHERE (id = ? OR invoice_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [invoiceId, invoiceId, currentLabId]);
             if (!invoice) {
                 return sendError(res, 404, 'Invoice not found');
             }
 
-            const items = labDb.query('SELECT * FROM invoice_items WHERE invoice_id = ?', [invoiceId]);
+            const items = labDb.query('SELECT * FROM invoice_items WHERE invoice_id = ?', [invoice.id]);
             const booking = labDb.get('SELECT * FROM test_bookings WHERE id = ?', [invoice.booking_id]);
 
             return sendJson(res, 200, {
@@ -1092,7 +1092,7 @@ const server = http.createServer(async (req, res) => {
             const body = await parseJsonBody(req);
             const { paymentStatus, paymentMethod, transactionReference, amountPaid } = body;
 
-            const invoice = labDb.get('SELECT * FROM invoices WHERE id = ? AND lab_id = ?', [invoiceId, currentLabId]);
+            const invoice = labDb.get('SELECT * FROM invoices WHERE (id = ? OR invoice_number = ?) AND (lab_id = ? OR lab_id = \'lab-01\')', [invoiceId, invoiceId, currentLabId]);
             if (!invoice) {
                 return sendError(res, 404, 'Invoice not found');
             }
@@ -1105,7 +1105,7 @@ const server = http.createServer(async (req, res) => {
                 UPDATE invoices 
                 SET payment_status = ?, payment_method = ?, transaction_reference = ?, amount_paid = ?, balance_due = ?
                 WHERE id = ?
-            `, [status, paymentMethod || 'UPI', transactionReference || ('TXN-' + Date.now()), paid, balance, invoiceId]);
+            `, [status, paymentMethod || 'UPI', transactionReference || ('TXN-' + Date.now()), paid, balance, invoice.id]);
 
             // Sync booking payment status
             labDb.run(`UPDATE test_bookings SET payment_status = ? WHERE id = ?`, [status, invoice.booking_id]);

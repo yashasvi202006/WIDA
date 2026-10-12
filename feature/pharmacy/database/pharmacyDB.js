@@ -182,7 +182,39 @@ export function logoutUser() {
 
 export function getCurrentUser() {
     ensureUsersInitialized();
+    let ecoUser = null;
+    try {
+        ecoUser = JSON.parse(localStorage.getItem('wida_ecosystem_user') || 'null');
+    } catch {}
+
     let current = getItem(KEYS.CURRENT_USER);
+
+    // If active ecosystem user is logged in, prioritize their real identity
+    if (ecoUser && (ecoUser.role === 'pharmacy' || ecoUser.pharmacistName || ecoUser.drugLicense || ecoUser.fullName || ecoUser.name)) {
+        const activeName = ecoUser.name || ecoUser.pharmacistName || ecoUser.fullName;
+        if (activeName) {
+            current = {
+                id: 'PH-' + (ecoUser.id || 'current'),
+                fullName: activeName,
+                name: activeName,
+                email: ecoUser.email || '',
+                password: ecoUser.password || 'password123',
+                phone: ecoUser.phone || '+91 98765 43210',
+                role: 'Chief Pharmacist & Medical Director',
+                pharmacyName: ecoUser.pharmacyName || 'WIDA Central Healthcare Pharmacy',
+                licenseNumber: ecoUser.drugLicense || ecoUser.registeredId || 'WIDA-PH-8092',
+                specialization: 'Clinical Pharmacology & Dispensing',
+                qualifications: 'PharmD, B.Pharm, Clinical Lead',
+                experience: '10+ Years',
+                department: 'Central Pharmacy Care',
+                profileImage: '',
+                lastLogin: new Date().toISOString()
+            };
+            setItem(KEYS.CURRENT_USER, current);
+            return current;
+        }
+    }
+
     if (!current) {
         current = DEMO_DOCTORS[0];
         setItem(KEYS.CURRENT_USER, current);
@@ -216,19 +248,124 @@ export function changePassword(currentPassword, newPassword) {
     return updateUserProfile({ password: newPassword });
 }
 
-// ---------- Data persistence ----------
+// ---------- Data persistence with Unified Cross-Module Sync ----------
 export function saveMedicines(data) { setCollection(KEYS.MEDICINES, data); }
 export function loadMedicines() { return getCollection(KEYS.MEDICINES); }
-export function savePrescriptions(data) { setCollection(KEYS.PRESCRIPTIONS, data); }
-export function loadPrescriptions() { return getCollection(KEYS.PRESCRIPTIONS); }
+
+export function savePrescriptions(data) {
+    setCollection(KEYS.PRESCRIPTIONS, data);
+    // Also sync back to wida_shared_prescriptions
+    try {
+        const raw = localStorage.getItem('wida_shared_prescriptions') || '[]';
+        const shared = JSON.parse(raw);
+        data.forEach(p => {
+            const sIdx = shared.findIndex(s => s.id === p.id || s.rxNumber === p.id);
+            if (sIdx !== -1) {
+                shared[sIdx].dispensedStatus = p.status === 'Dispensed' ? 'DISPENSED' : shared[sIdx].dispensedStatus;
+            }
+        });
+        localStorage.setItem('wida_shared_prescriptions', JSON.stringify(shared));
+    } catch {}
+}
+
+export function loadPrescriptions() {
+    const local = getCollection(KEYS.PRESCRIPTIONS);
+    const map = new Map();
+    local.forEach(p => map.set(p.id, p));
+
+    // Merge cross-module shared prescriptions
+    try {
+        const raw = localStorage.getItem('wida_shared_prescriptions') || '[]';
+        const shared = JSON.parse(raw);
+        shared.forEach(rx => {
+            const rxId = rx.id || rx.rxNumber || ('RX-' + Date.now());
+            if (!map.has(rxId)) {
+                map.set(rxId, {
+                    id: rxId,
+                    patientId: rx.patientId || 'PAT-001',
+                    patientName: rx.patientName || 'Yashasvi Saini',
+                    patientAge: rx.patientAge || 24,
+                    patientGender: rx.patientGender || 'Male',
+                    doctorId: rx.doctorId || 'DOC-1001',
+                    doctorName: rx.doctorName || 'Dr. Aarav Sharma',
+                    doctorDepartment: rx.doctorSpecialization || rx.specialization || 'Cardiology',
+                    prescriptionDate: rx.date || new Date().toISOString().slice(0, 10),
+                    status: rx.dispensedStatus === 'DISPENSED' ? 'Dispensed' : 'Approved for Dispensing',
+                    items: (rx.medicines || []).map((m, idx) => ({
+                        id: `RXI-${rxId}-${idx}`,
+                        medicineId: `MED-${1001 + idx}`,
+                        medicineName: typeof m === 'string' ? m : (m.name || m.medicineName),
+                        dosage: m.dosage || '500 mg',
+                        frequency: m.frequency || 'Once Daily (After food)',
+                        duration: m.duration || '30 Days',
+                        quantityRequested: m.qty || 30,
+                        quantityDispensed: rx.dispensedStatus === 'DISPENSED' ? (m.qty || 30) : 0,
+                        unitPrice: m.price || 48.00,
+                        availableStock: 150
+                    })),
+                    pharmacistNotes: rx.diagnosis || 'Clinical continuity prescription.'
+                });
+            }
+        });
+    } catch {}
+
+    return Array.from(map.values());
+}
+
 export function saveSuppliers(data) { setCollection(KEYS.SUPPLIERS, data); }
 export function loadSuppliers() { return getCollection(KEYS.SUPPLIERS); }
 export function savePurchaseOrders(data) { setCollection(KEYS.PURCHASE_ORDERS, data); }
 export function loadPurchaseOrders() { return getCollection(KEYS.PURCHASE_ORDERS); }
 export function saveSalesInvoices(data) { setCollection(KEYS.SALES_INVOICES, data); }
 export function loadSalesInvoices() { return getCollection(KEYS.SALES_INVOICES); }
-export function saveCustomerOrders(data) { setCollection(KEYS.CUSTOMER_ORDERS, data); }
-export function loadCustomerOrders() { return getCollection(KEYS.CUSTOMER_ORDERS); }
+
+export function saveCustomerOrders(data) {
+    setCollection(KEYS.CUSTOMER_ORDERS, data);
+    // Also sync status back to wida_shared_pharmacy_orders
+    try {
+        const raw = localStorage.getItem('wida_shared_pharmacy_orders') || '[]';
+        const shared = JSON.parse(raw);
+        data.forEach(o => {
+            const sIdx = shared.findIndex(s => s.id === o.id || s.orderNumber === o.id);
+            if (sIdx !== -1) {
+                shared[sIdx].status = o.orderStatus === 'Ready for Collection' ? 'READY_FOR_PICKUP' :
+                                      o.orderStatus === 'Completed' ? 'COMPLETED' : o.orderStatus;
+            }
+        });
+        localStorage.setItem('wida_shared_pharmacy_orders', JSON.stringify(shared));
+    } catch {}
+}
+
+export function loadCustomerOrders() {
+    const local = getCollection(KEYS.CUSTOMER_ORDERS);
+    const map = new Map();
+    local.forEach(o => map.set(o.id, o));
+
+    // Merge cross-module shared patient orders
+    try {
+        const raw = localStorage.getItem('wida_shared_pharmacy_orders') || '[]';
+        const shared = JSON.parse(raw);
+        shared.forEach(o => {
+            const ordId = o.id || o.orderNumber || ('ORD-' + Date.now());
+            if (!map.has(ordId)) {
+                map.set(ordId, {
+                    id: ordId,
+                    orderDate: o.createdAt ? new Date(o.createdAt).toLocaleString('en-IN') : '2026-10-12 09:00 AM',
+                    customerName: o.patientName || o.customerName || 'Yashasvi Saini',
+                    customerPhone: o.patientPhone || o.customerPhone || '+91 98765 43210',
+                    itemsCount: Array.isArray(o.medicines) ? o.medicines.length : (o.itemsCount || 1),
+                    totalAmount: o.totalAmount || 178.00,
+                    orderStatus: o.status === 'RECEIVED' ? 'Processing' : (o.status || 'Processing'),
+                    paymentStatus: o.paymentStatus || 'Paid',
+                    deliveryType: o.address ? 'Home Delivery' : 'Counter Pickup'
+                });
+            }
+        });
+    } catch {}
+
+    return Array.from(map.values());
+}
+
 export function saveReturns(data) { setCollection(KEYS.RETURNS, data); }
 export function loadReturns() { return getCollection(KEYS.RETURNS); }
 export function saveNotifications(data) { setCollection(KEYS.NOTIFICATIONS, data); }

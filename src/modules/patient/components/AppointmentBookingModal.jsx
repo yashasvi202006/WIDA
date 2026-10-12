@@ -1,35 +1,66 @@
-import React, { useState } from 'react';
-import { PATIENT_MOCK_DOCTORS } from '../data/patientMockData';
+import React, { useState, useEffect } from 'react';
+import { widaBridge } from '../../../services/widaEcosystemBridge';
 import { X, Calendar, Clock, MapPin, Video, Check, ChevronRight } from 'lucide-react';
-export const AppointmentBookingModal = ({ isOpen, onClose, onBookSuccess, preselectedDoctorId }) => {
+
+export const AppointmentBookingModal = ({ isOpen, onClose, onBookSuccess, preselectedDoctorId, doctors: propDoctors }) => {
+    const allDoctors = (propDoctors && propDoctors.length > 0) ? propDoctors : widaBridge.getDoctors();
     const [step, setStep] = useState(1);
-    const [specialization, setSpecialization] = useState('Cardiology');
-    const [selectedDoctor, setSelectedDoctor] = useState(() => {
-        return PATIENT_MOCK_DOCTORS.find((d) => d.id === preselectedDoctorId) || PATIENT_MOCK_DOCTORS[0];
-    });
+    const [specialization, setSpecialization] = useState('All');
+
+    const findDoc = (docId) => {
+        if (!docId) return allDoctors[0];
+        return allDoctors.find((d) => 
+            d.id === docId || 
+            String(d.id) === String(docId) ||
+            String(d.doctorId) === String(docId) ||
+            String(d.id).replace(/\D/g, '') === String(docId).replace(/\D/g, '')
+        ) || allDoctors[0];
+    };
+
+    const [selectedDoctor, setSelectedDoctor] = useState(() => findDoc(preselectedDoctorId));
+
+    useEffect(() => {
+        if (preselectedDoctorId) {
+            const found = findDoc(preselectedDoctorId);
+            if (found) {
+                setSelectedDoctor(found);
+                setStep(2);
+            }
+        }
+    }, [preselectedDoctorId, allDoctors]);
+
     const [selectedDate, setSelectedDate] = useState('2026-10-14');
     const [selectedTime, setSelectedTime] = useState('10:30 AM');
     const [consultType, setConsultType] = useState('In-person');
-    const [reason, setReason] = useState('Regular checkup and cardiology review');
+    const [reason, setReason] = useState('Regular checkup and clinical review');
+
     if (!isOpen)
         return null;
-    const specializations = ['Cardiology', 'Dermatology', 'General Medicine', 'Ayurveda', 'Homeopathy'];
-    const filteredDoctors = PATIENT_MOCK_DOCTORS.filter((d) => d.specialization.toLowerCase().includes(specialization.toLowerCase().slice(0, 4)));
-    const doctorsToDisplay = filteredDoctors.length > 0 ? filteredDoctors : PATIENT_MOCK_DOCTORS;
+
+    const specializations = ['All', 'Cardiology', 'Dermatology', 'General Medicine', 'Neurology', 'Orthopedics', 'Ayurveda', 'Homeopathy'];
+
+    const filteredDoctors = allDoctors.filter((d) => {
+        if (specialization === 'All') return true;
+        const s = (d.specialization || d.specializationName || '').toLowerCase();
+        const target = specialization.toLowerCase().slice(0, 4);
+        return s.includes(target);
+    });
+    const doctorsToDisplay = filteredDoctors.length > 0 ? filteredDoctors : allDoctors;
+
     const handleConfirm = () => {
         if (!selectedDoctor)
             return;
         onBookSuccess({
             doctorId: selectedDoctor.id,
-            doctorName: selectedDoctor.name,
-            doctorSpecialization: selectedDoctor.specialization,
-            doctorAvatar: selectedDoctor.photo,
+            doctorName: selectedDoctor.name || selectedDoctor.fullName,
+            doctorSpecialization: selectedDoctor.specialization || selectedDoctor.specializationName,
+            doctorAvatar: selectedDoctor.photo || selectedDoctor.avatarUrl || selectedDoctor.profilePhotoUrl,
             date: selectedDate,
             time: selectedTime,
             type: consultType,
             reason,
-            fee: selectedDoctor.consultationFee,
-            location: selectedDoctor.location
+            fee: selectedDoctor.consultationFee || 750,
+            location: selectedDoctor.location || selectedDoctor.hospital || selectedDoctor.hospitalClinicName || 'WIDA Apex Medical Center'
         });
         onClose();
     };
@@ -80,22 +111,52 @@ export const AppointmentBookingModal = ({ isOpen, onClose, onBookSuccess, presel
           {step === 2 && (<div>
               <h6 className="mb-3 font-heading">Step 2: Choose Doctor</h6>
               <div className="d-flex flex-column gap-2 mb-4">
-                {doctorsToDisplay.map((doc) => (<div key={doc.id} onClick={() => setSelectedDoctor(doc)} className="p-3 rounded d-flex align-items-center justify-content-between border" style={{
-                    cursor: 'pointer',
-                    borderColor: selectedDoctor?.id === doc.id ? 'var(--p-primary)' : 'var(--p-border)',
-                    backgroundColor: selectedDoctor?.id === doc.id ? 'var(--p-primary-subtle)' : 'var(--p-surface)'
-                }}>
-                    <div className="d-flex align-items-center gap-3">
-                      <img src={doc.photo} alt={doc.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}/>
-                      <div>
-                        <div className="fw-bold" style={{ color: 'var(--p-text-main)' }}>{doc.name}</div>
-                        <div style={{ fontSize: '0.82rem', color: 'var(--p-text-muted)' }}>
-                          {doc.specialization} • {doc.experience} yrs exp • ₹{doc.consultationFee}
+                {doctorsToDisplay.map((doc) => {
+                    const dName = doc.name || doc.fullName || 'Dr. Specialist';
+                    const dSpec = doc.specialization || doc.specializationName || 'General Physician';
+                    const dPhoto = doc.photo || doc.avatarUrl || doc.profilePhotoUrl;
+                    const dExp = doc.experience || doc.yearsOfExperience || 5;
+                    const dFee = doc.consultationFee || 750;
+                    const isReg = doc.isRegistered || Boolean(doc.medicalRegistrationNumber);
+
+                    return (
+                        <div 
+                            key={doc.id} 
+                            onClick={() => setSelectedDoctor(doc)} 
+                            className="p-3 rounded d-flex align-items-center justify-content-between border" 
+                            style={{
+                                cursor: 'pointer',
+                                borderColor: selectedDoctor?.id === doc.id ? 'var(--p-primary)' : 'var(--p-border)',
+                                backgroundColor: selectedDoctor?.id === doc.id ? 'var(--p-primary-subtle)' : 'var(--p-surface)'
+                            }}
+                        >
+                            <div className="d-flex align-items-center gap-3">
+                                <img 
+                                    src={dPhoto} 
+                                    alt={dName} 
+                                    onError={(e) => {
+                                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007C77&color=fff&bold=true`;
+                                    }}
+                                    style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
+                                />
+                                <div>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <div className="fw-bold" style={{ color: 'var(--p-text-main)' }}>{dName}</div>
+                                        {isReg && (
+                                            <span style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '8px', backgroundColor: '#007C77', color: '#fff', fontWeight: 700 }}>
+                                                Registered
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div style={{ fontSize: '0.82rem', color: 'var(--p-text-muted)' }}>
+                                        {dSpec} • {dExp} yrs exp • ₹{dFee}
+                                    </div>
+                                </div>
+                            </div>
+                            {selectedDoctor?.id === doc.id && <Check size={18} style={{ color: 'var(--p-primary)' }}/>}
                         </div>
-                      </div>
-                    </div>
-                    {selectedDoctor?.id === doc.id && <Check size={18} style={{ color: 'var(--p-primary)' }}/>}
-                  </div>))}
+                    );
+                })}
               </div>
               <div className="d-flex justify-content-between">
                 <button className="patient-btn patient-btn-outline" onClick={() => setStep(1)}>Back</button>
@@ -113,7 +174,10 @@ export const AppointmentBookingModal = ({ isOpen, onClose, onBookSuccess, presel
               <div className="mb-4">
                 <label className="form-label fw-bold" style={{ fontSize: '0.85rem' }}>Available Time Slots</label>
                 <div className="d-flex flex-wrap gap-2">
-                  {selectedDoctor?.availableSlots.map((slot) => (<button key={slot} type="button" className={`patient-btn patient-btn-sm ${selectedTime === slot ? 'patient-btn-primary' : 'patient-btn-outline'}`} onClick={() => setSelectedTime(slot)}>
+                  {(selectedDoctor?.availableSlots && selectedDoctor.availableSlots.length > 0 
+                      ? selectedDoctor.availableSlots 
+                      : ['09:30 AM', '11:00 AM', '02:00 PM', '04:30 PM']
+                  ).map((slot) => (<button key={slot} type="button" className={`patient-btn patient-btn-sm ${selectedTime === slot ? 'patient-btn-primary' : 'patient-btn-outline'}`} onClick={() => setSelectedTime(slot)}>
                       <Clock size={13}/> {slot}
                     </button>))}
                 </div>

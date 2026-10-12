@@ -14,7 +14,7 @@ import { PatientSidebar } from './components/PatientSidebar';
 import { PatientTopbar } from './components/PatientTopbar';
 import { PatientMobileNav } from './components/PatientMobileNav';
 import { AppointmentBookingModal } from './components/AppointmentBookingModal';
-import { AICareModal } from './components/AICareModal';
+import { WidaAIAssistantModal } from '../../components/WidaAIAssistantModal';
 import { MSWDiagnosticsModal } from './components/MSWDiagnosticsModal';
 import { NotificationToast } from './components/NotificationToast';
 import { MedicalReceiptModal } from './components/MedicalReceiptModal';
@@ -60,6 +60,22 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
     const [mswModalOpen, setMswModalOpen] = useState(false);
     const [receiptPrescription, setReceiptPrescription] = useState(null);
     const [toasts, setToasts] = useState([]);
+    // Doctors Directory Real-Time State
+    const [doctors, setDoctors] = useState(() => widaBridge.getDoctors());
+
+    useEffect(() => {
+        const syncDocs = () => {
+            setDoctors(widaBridge.getDoctors());
+        };
+        window.addEventListener('wida:doctor-registered', syncDocs);
+        window.addEventListener('wida:switch-portal', syncDocs);
+        window.addEventListener('storage', syncDocs);
+        return () => {
+            window.removeEventListener('wida:doctor-registered', syncDocs);
+            window.removeEventListener('wida:switch-portal', syncDocs);
+            window.removeEventListener('storage', syncDocs);
+        };
+    }, []);
     // Core Reactive Data Store
     const [profile, setProfile] = useState(() => patientLocalStorageService.getProfile());
     const [appointments, setAppointments] = useState(() => patientLocalStorageService.getAppointments());
@@ -447,7 +463,7 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
                 setBookingModalOpen(true);
             }} onCancelAppointment={handleCancelAppointment}/>)}
 
-          {currentTab === 'doctors' && (<PatientDoctors doctors={widaBridge.getDoctors()} onBookDoctor={(doc) => {
+          {currentTab === 'doctors' && (<PatientDoctors doctors={doctors} onBookDoctor={(doc) => {
                 setPreselectedDoctorId(doc.id);
                 setBookingModalOpen(true);
             }}/>)}
@@ -506,9 +522,9 @@ export const PatientModule = ({ initialTab = 'dashboard', onLogout }) => {
       <PatientMobileNav currentTab={currentTab} onSelectTab={setCurrentTab} onToggleMobileDrawer={() => setMobileDrawerOpen(true)}/>
 
       {/* Interactive Modals */}
-      <AppointmentBookingModal isOpen={bookingModalOpen} onClose={() => setBookingModalOpen(false)} onBookSuccess={handleBookAppointmentSuccess} preselectedDoctorId={preselectedDoctorId}/>
+      <AppointmentBookingModal isOpen={bookingModalOpen} onClose={() => setBookingModalOpen(false)} onBookSuccess={handleBookAppointmentSuccess} preselectedDoctorId={preselectedDoctorId} doctors={doctors}/>
 
-      <AICareModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)}/>
+      <WidaAIAssistantModal isOpen={aiModalOpen} onClose={() => setAiModalOpen(false)} initialModule="patient"/>
 
       <MSWDiagnosticsModal isOpen={mswModalOpen} onClose={() => setMswModalOpen(false)} onDataReset={loadApiData}/>
 

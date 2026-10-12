@@ -1,7 +1,9 @@
-import React from 'react';
-import { UserCheck, ShieldAlert, Award, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { UserCheck, ShieldAlert, Award, Clock, Bot } from 'lucide-react';
+import { WidaAIAssistantModal } from '../../../src/components/WidaAIAssistantModal.jsx';
 
 export const TopNav = ({ activeSectionTitle, user, lab, onRoleSwitch, onSimulateVerify }) => {
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const roleBadges = {
         LAB_DIRECTOR: { label: 'Lab Director', color: 'var(--lab-purple)', bg: 'var(--lab-purple-subtle)' },
         PATHOLOGIST: { label: 'Consultant Pathologist', color: 'var(--lab-primary-dark)', bg: 'var(--lab-primary-subtle)' },
@@ -21,6 +23,27 @@ export const TopNav = ({ activeSectionTitle, user, lab, onRoleSwitch, onSimulate
             </div>
 
             <div className="lab-topnav-actions">
+                {/* AI Assistant Button */}
+                <button
+                    type="button"
+                    className="lab-btn lab-btn-outline lab-btn-sm"
+                    onClick={() => setIsAiModalOpen(true)}
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(99, 102, 241, 0.15) 100%)',
+                        borderColor: 'rgba(13, 148, 136, 0.35)',
+                        color: 'var(--lab-primary-dark)',
+                        fontWeight: 700,
+                        fontSize: '0.76rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                    }}
+                    title="Open WIDA AI Diagnostic & Clinical Assistant"
+                >
+                    <Bot size={15} style={{ color: 'var(--lab-primary)' }} />
+                    <span>AI Assistant</span>
+                </button>
+
                 {/* Lab Verification Status Badge */}
                 {lab?.status === 'VERIFIED' ? (
                     <span className="lab-badge lab-badge-teal" title="Authorized Diagnostic Testing Centre">
@@ -80,6 +103,13 @@ export const TopNav = ({ activeSectionTitle, user, lab, onRoleSwitch, onSimulate
                     </div>
                 </div>
             </div>
+
+            <WidaAIAssistantModal
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                initialDomain="lab"
+            />
         </header>
     );
 };
+

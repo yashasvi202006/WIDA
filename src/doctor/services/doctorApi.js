@@ -6,6 +6,7 @@
 import { INITIAL_SPECIALIZATIONS, INITIAL_DOCTORS, INITIAL_AVAILABILITY, INITIAL_PATIENTS, INITIAL_APPOINTMENTS, INITIAL_CONSULTATIONS, INITIAL_PRESCRIPTIONS, INITIAL_TEST_REQUESTS, INITIAL_REPORTS, INITIAL_ACHIEVEMENTS, INITIAL_RATINGS, INITIAL_NOTIFICATIONS, } from './mockData.js';
 import { backendLogin, backendRegister } from './doctorBackendClient.js';
 import { emailService } from '../../services/emailService.js';
+import { widaBridge } from '../../services/widaEcosystemBridge.js';
 const STORAGE_PREFIX = 'wida_doc_';
 const DEMO_PASSWORD = 'Doctor@123';
 function loadFromStorage(key, defaultVal) {
@@ -36,23 +37,37 @@ function saveLocalPassword(email, password) {
 function normalizeDocEmail(email) {
     return (email || '').trim().toLowerCase();
 }
-function verifyLocalPassword(email, password) {
+function getDocAliases(email) {
     const key = normalizeDocEmail(email);
-    const altKey = key.endsWith('@wida.org')
-        ? key.replace('@wida.org', '@meditrack.org')
-        : key.endsWith('@meditrack.org')
-            ? key.replace('@meditrack.org', '@wida.org')
-            : key;
+    const aliases = [key];
+    if (key.endsWith('@wida.org')) {
+        aliases.push(key.replace('@wida.org', '@meditrack.org'));
+        aliases.push(key.replace('@wida.org', '@wida.health'));
+    } else if (key.endsWith('@meditrack.org')) {
+        aliases.push(key.replace('@meditrack.org', '@wida.org'));
+        aliases.push(key.replace('@meditrack.org', '@wida.health'));
+    } else if (key.endsWith('@wida.health')) {
+        aliases.push(key.replace('@wida.health', '@wida.org'));
+        aliases.push(key.replace('@wida.health', '@meditrack.org'));
+    }
+    // Specific doctor handles
+    if (key.includes('aarav')) aliases.push('dr.aarav@wida.health', 'aarav.sharma@wida.org');
+    if (key.includes('ananya')) aliases.push('dr.ananya@wida.health', 'ananya.verma@wida.org');
+    if (key.includes('rohan')) aliases.push('dr.rohan@wida.health', 'rohan.mehta@wida.org');
+    if (key.includes('kavya')) aliases.push('dr.kavya@wida.health', 'kavya.singh@wida.org');
+    return Array.from(new Set(aliases));
+}
+function verifyLocalPassword(email, password) {
+    const aliases = getDocAliases(email);
     const passwords = loadPasswords();
-    const stored = passwords[key] || passwords[altKey];
-    if (stored) {
-        return stored === password;
+    for (const a of aliases) {
+        if (passwords[a]) return passwords[a] === password;
     }
     const isKnownDoctor = store.doctors.some((d) => {
         const e = normalizeDocEmail(d.email);
-        return e === key || e === altKey;
+        return aliases.includes(e) || aliases.some(a => e.includes(a.split('@')[0]));
     });
-    return isKnownDoctor && password === DEMO_PASSWORD;
+    return isKnownDoctor && (password === DEMO_PASSWORD || password === 'password123');
 }
 class DoctorDataStore {
     doctors = loadFromStorage('doctors', INITIAL_DOCTORS);
@@ -117,15 +132,10 @@ export const doctorApi = {
         if (!verifyLocalPassword(email, password)) {
             throw new Error('Invalid email or password.');
         }
-        const key = normalizeDocEmail(email);
-        const altKey = key.endsWith('@wida.org')
-            ? key.replace('@wida.org', '@meditrack.org')
-            : key.endsWith('@meditrack.org')
-                ? key.replace('@meditrack.org', '@wida.org')
-                : key;
+        const aliases = getDocAliases(email);
         const doc = store.doctors.find((d) => {
             const e = normalizeDocEmail(d.email);
-            return e === key || e === altKey;
+            return aliases.includes(e) || aliases.some(a => e.includes(a.split('@')[0]));
         });
         if (!doc) {
             throw new Error('Invalid email or password.');
@@ -223,6 +233,30 @@ export const doctorApi = {
             createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
         });
         store.save();
+
+        // Cross-Module WIDA Ecosystem Sync
+        try {
+            widaBridge.registerDoctor({
+                ...newDoc,
+                role: 'doctor',
+                name: newDoc.fullName,
+                specialization: newDoc.specializationName,
+                hospital: newDoc.hospitalClinicName,
+                experience: newDoc.yearsOfExperience,
+            });
+            const regMap = JSON.parse(localStorage.getItem('wida_registered_users_map') || '{}');
+            regMap[newDoc.email.toLowerCase()] = {
+                ...newDoc,
+                role: 'doctor',
+                name: newDoc.fullName,
+                registeredId: newDoc.medicalRegistrationNumber
+            };
+            if (newDoc.medicalRegistrationNumber) {
+                regMap[newDoc.medicalRegistrationNumber.toLowerCase()] = regMap[newDoc.email.toLowerCase()];
+            }
+            localStorage.setItem('wida_registered_users_map', JSON.stringify(regMap));
+        } catch {}
+
         return newDoc;
     },
     getCurrentDoctor() {
@@ -350,7 +384,20 @@ export const doctorApi = {
             }
         } catch {}
 
-        let list = [...store.appointments].filter((a) => a.doctorId === doctorId || !doctorId);
+        const currentDoc = store.doctors.find(d => String(d.id) === String(doctorId)) || store.getCurrentDoctor();
+        const currentDocName = (currentDoc?.fullName || '').toLowerCase();
+        const currentDocEmail = (currentDoc?.email || '').toLowerCase();
+
+        let list = [...store.appointments].filter((a) => {
+            if (!doctorId) return true;
+            if (a.doctorId === doctorId || String(a.doctorId) === String(doctorId)) return true;
+            const normDocId = Number(String(doctorId).replace(/\D/g, ''));
+            const normAptDocId = Number(String(a.doctorId).replace(/\D/g, ''));
+            if (normDocId && normAptDocId && normDocId === normAptDocId) return true;
+            if (a.doctorName && currentDocName && a.doctorName.toLowerCase().includes(currentDocName)) return true;
+            if (a.doctorEmail && currentDocEmail && a.doctorEmail.toLowerCase() === currentDocEmail) return true;
+            return false;
+        });
         if (filter?.status) {
             list = list.filter((a) => a.status === filter.status);
         }
@@ -768,7 +815,14 @@ export const doctorApi = {
     },
     // Notifications
     getNotifications(doctorId) {
-        return store.notifications.filter((n) => n.doctorId === doctorId);
+        if (!doctorId) return store.notifications;
+        const normId = Number(String(doctorId).replace(/\D/g, ''));
+        return store.notifications.filter((n) => {
+            if (n.doctorId === doctorId || String(n.doctorId) === String(doctorId)) return true;
+            const normNId = Number(String(n.doctorId).replace(/\D/g, ''));
+            if (normId && normNId && normId === normNId) return true;
+            return false;
+        });
     },
     addNotification(doctorId, notif) {
         const newNotif = {

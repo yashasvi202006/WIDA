@@ -17,17 +17,6 @@ export const PatientPharmacy = ({ orders, prescriptions, onOrderPrescription }) 
           <span className="patient-badge patient-badge-teal py-2 px-3">
             <ShieldCheck size={14}/> GPP Compliant Licensed Pharmacies
           </span>
-          <button
-            type="button"
-            className="patient-btn patient-btn-outline py-2 px-3 d-flex align-items-center gap-2"
-            style={{ borderColor: '#16A34A', color: '#16A34A', fontWeight: 700 }}
-            onClick={() => widaBridge.switchPortal('pharmacy')}
-            title="Launch WIDA Central Pharmacy Module"
-          >
-            <Pill size={15} />
-            <span>Open Pharmacy Portal</span>
-            <ExternalLink size={13} />
-          </button>
         </div>
       </div>
 

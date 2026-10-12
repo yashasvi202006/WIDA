@@ -43,17 +43,6 @@ export const PatientDiagnostics = ({ tests, labs, reports, bookings, onBookTest,
           <span className="patient-badge patient-badge-teal py-2 px-3">
             <ShieldCheck size={14}/> NABL & CAP Accredited Labs
           </span>
-          <button
-            type="button"
-            className="patient-btn patient-btn-outline py-2 px-3 d-flex align-items-center gap-2"
-            style={{ borderColor: '#0D9488', color: '#0D9488', fontWeight: 700 }}
-            onClick={() => widaBridge.switchPortal('lab')}
-            title="Launch WIDA Diagnostic Laboratory Module"
-          >
-            <Microscope size={15} />
-            <span>Open Lab Portal</span>
-            <ExternalLink size={13} />
-          </button>
         </div>
       </div>
 

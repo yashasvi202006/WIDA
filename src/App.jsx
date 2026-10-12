@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 // WIDA Components & Gateways
 import { UnifiedAuthGateway } from './components/UnifiedAuthGateway.jsx';
+import { EcosystemHeader } from './components/EcosystemHeader.jsx';
 import { widaBridge } from './services/widaEcosystemBridge';
+import { WidaAIAssistantModal } from './components/WidaAIAssistantModal.jsx';
 
 // WIDA Doctor Module (Vanshika Tailor)
 import DoctorApp from './doctor/DoctorApp.jsx';
@@ -34,6 +36,7 @@ export default function App() {
 
   const [portal, setPortal] = useState(getInitialPortal);
   const [currentUser, setCurrentUser] = useState(() => widaBridge.getCurrentUser());
+  const [globalAiOpen, setGlobalAiOpen] = useState(false);
   const [showAuthGateway, setShowAuthGateway] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('login') === 'true') return true;
@@ -121,10 +124,57 @@ export default function App() {
   // Active Multi-Module Connected Ecosystem
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Universal Connected Ecosystem Header */}
+      <EcosystemHeader
+        activePortal={portal}
+        onSwitchPortal={handlePortalSwitch}
+        onLogout={handleLogout}
+        onSwitchUser={(newUser) => {
+          setCurrentUser(newUser);
+        }}
+      />
+
       {/* Primary Domain View */}
       <div style={{ flex: 1 }}>
         {renderActivePortal()}
       </div>
+
+      {/* Floating Global AI Assistant Trigger */}
+      <button
+        type="button"
+        id="wida-global-ai-trigger"
+        onClick={() => setGlobalAiOpen(true)}
+        style={{
+          position: 'fixed',
+          bottom: '22px',
+          right: '22px',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px 18px',
+          borderRadius: '50px',
+          background: 'linear-gradient(135deg, #0d9488 0%, #4f46e5 100%)',
+          color: '#ffffff',
+          fontWeight: 700,
+          fontSize: '0.86rem',
+          border: '2px solid rgba(255, 255, 255, 0.4)',
+          boxShadow: '0 8px 24px rgba(13, 148, 136, 0.4)',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+        title="Open WIDA Unified AI Healthcare Assistant"
+      >
+        <span style={{ fontSize: '1.1rem' }}>🤖</span>
+        <span>AI Health Assistant</span>
+      </button>
+
+      <WidaAIAssistantModal
+        isOpen={globalAiOpen}
+        onClose={() => setGlobalAiOpen(false)}
+        initialDomain={portal}
+      />
     </div>
   );
 }
+
