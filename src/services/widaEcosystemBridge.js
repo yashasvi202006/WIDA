@@ -392,14 +392,190 @@ class WidaEcosystemBridge {
         }
     }
 
-    // Doctors
-    getDoctors() {
-        try {
-            const raw = localStorage.getItem('wida_shared_doctors');
-            return raw ? JSON.parse(raw) : INITIAL_DOCTORS;
-        } catch {
-            return INITIAL_DOCTORS;
+    // Helper to check if a candidate record is genuinely a doctor
+    _isAuthenticDoctor(d) {
+        if (!d) return false;
+        // Strict exclusion of non-doctor roles
+        if (d.role && d.role !== 'doctor') return false;
+        if (d.abhaId || d.labLicense || d.drugLicense) return false;
+        
+        const regId = String(d.medicalRegistrationNumber || d.registeredId || d.licenseNumber || '').trim();
+        // Check for non-medical registration formats (ABHA IDs start with 91-, Lab with NABL-, Pharmacy with DL- or WIDA-PH-)
+        if (regId.startsWith('91-') || regId.startsWith('NABL-') || regId.startsWith('DL-') || regId.startsWith('WIDA-PH-')) {
+            return false;
         }
+
+        // Genuine doctor indicators
+        if (d.role === 'doctor') return true;
+        if (regId.startsWith('MCI-') || regId.startsWith('NMC-') || regId.startsWith('NBE-') || regId.startsWith('DOC-')) {
+            return true;
+        }
+        if (d.id && (String(d.id).startsWith('doc-') || [1, 2, 3, 4].includes(d.id))) {
+            return true;
+        }
+        return false;
+    }
+
+    // Helper to normalize doctor record
+    _normalizeDoctor(d, forceRegistered = false) {
+        if (!this._isAuthenticDoctor(d)) return null;
+        const fullName = d.fullName || d.name || 'Dr. Medical Practitioner';
+        const docId = d.id ? String(d.id) : ('doc-' + (d.doctorId || Date.now()));
+        const spec = d.specialization || d.specializationName || 'General Physician';
+        const specLower = spec.toLowerCase();
+        const system = d.medicineSystem || (
+            specLower.includes('ayur') ? 'Ayurveda' :
+            specLower.includes('homeo') ? 'Homeopathy' : 'Allopathy'
+        );
+        const medReg = d.medicalRegistrationNumber || (String(d.registeredId || '').startsWith('MCI-') || String(d.registeredId || '').startsWith('NMC-') || String(d.registeredId || '').startsWith('DOC-') ? d.registeredId : 'MCI-REG-VALIDATED');
+        const isReg = forceRegistered || Boolean(d.isRegistered || (d.role === 'doctor' && d.email && !d.email.endsWith('@wida.health')));
+
+        return {
+            id: docId.startsWith('doc-') ? docId : `doc-${docId}`,
+            doctorId: d.doctorId || (typeof d.id === 'number' ? d.id : parseInt(String(d.id).replace(/\D/g, ''), 10) || 1),
+            name: fullName,
+            fullName: fullName,
+            email: d.email || '',
+            phone: d.phone || d.phoneNumber || '+91 98765 43210',
+            specialization: spec,
+            specializationName: spec,
+            subSpecialization: d.subSpecialization || '',
+            qualification: d.qualification || 'MBBS, MD',
+            experience: Number(d.experience || d.yearsOfExperience) || 5,
+            yearsOfExperience: Number(d.experience || d.yearsOfExperience) || 5,
+            hospital: d.hospital || d.hospitalClinicName || 'WIDA Apex Medical Center',
+            hospitalClinicName: d.hospitalClinicName || d.hospital || 'WIDA Apex Medical Center',
+            location: d.location || d.city || 'Sector 5, New Delhi',
+            consultationFee: Number(d.consultationFee) || 750,
+            rating: Number(d.rating || d.averageRating) || 5.0,
+            patientsCount: Number(d.patientsCount || d.totalPatients) || 0,
+            availability: d.availability || 'Mon - Sat (10:00 AM - 05:00 PM)',
+            availableSlots: d.availableSlots && d.availableSlots.length ? d.availableSlots : ['10:00 AM', '11:30 AM', '02:00 PM', '04:30 PM'],
+            avatarUrl: d.avatarUrl || d.photo || d.profilePhotoUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+            photo: d.photo || d.avatarUrl || d.profilePhotoUrl || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+            profilePhotoUrl: d.profilePhotoUrl || d.avatarUrl || d.photo || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300',
+            medicineSystem: system,
+            medicalRegistrationNumber: medReg,
+            verified: true,
+            isRegistered: isReg
+        };
+    }
+
+    registerDoctor(doc) {
+        if (!doc) return null;
+        const normalized = this._normalizeDoctor(doc, true);
+        if (!normalized) return null;
+        const docs = this.getDoctors();
+        const existingIdx = docs.findIndex(d => 
+            (d.email && normalized.email && d.email.toLowerCase() === normalized.email.toLowerCase()) ||
+            d.id === normalized.id ||
+            (d.medicalRegistrationNumber && normalized.medicalRegistrationNumber && d.medicalRegistrationNumber === normalized.medicalRegistrationNumber)
+        );
+        if (existingIdx >= 0) {
+            docs[existingIdx] = { ...docs[existingIdx], ...normalized };
+        } else {
+            docs.unshift(normalized);
+        }
+        localStorage.setItem('wida_shared_doctors', JSON.stringify(docs));
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('wida:doctor-registered', { detail: normalized }));
+        }
+        return normalized;
+    }
+
+    // Doctors — Real-time Multi-Store Sync
+    getDoctors() {
+        const docMap = new Map();
+
+        // 1. Seed doctors as baseline
+        INITIAL_DOCTORS.forEach(d => {
+            const norm = this._normalizeDoctor(d, false);
+            if (norm) {
+                const key = (norm.email || norm.id).toLowerCase();
+                docMap.set(key, norm);
+            }
+        });
+
+        // 2. Load from wida_shared_doctors (and sanitize storage)
+        try {
+            const rawShared = localStorage.getItem('wida_shared_doctors');
+            if (rawShared) {
+                const parsed = JSON.parse(rawShared);
+                const sanitized = [];
+                parsed.forEach(d => {
+                    if (this._isAuthenticDoctor(d)) {
+                        const norm = this._normalizeDoctor(d, d.isRegistered);
+                        if (norm) {
+                            const key = (norm.email || norm.id).toLowerCase();
+                            docMap.set(key, norm);
+                            sanitized.push(norm);
+                        }
+                    }
+                });
+                localStorage.setItem('wida_shared_doctors', JSON.stringify(sanitized));
+            }
+        } catch {}
+
+        // 3. Load from wida_doc_doctors (Doctor module store)
+        try {
+            const rawDocModule = localStorage.getItem('wida_doc_doctors');
+            if (rawDocModule) {
+                const parsed = JSON.parse(rawDocModule);
+                parsed.forEach(d => {
+                    if (this._isAuthenticDoctor(d)) {
+                        const isNew = d.id > 4 || (d.email && !d.email.endsWith('@wida.health'));
+                        const norm = this._normalizeDoctor(d, isNew);
+                        if (norm) {
+                            const key = (norm.email || norm.id).toLowerCase();
+                            if (!docMap.has(key) || isNew) {
+                                docMap.set(key, norm);
+                            }
+                        }
+                    }
+                });
+            }
+        } catch {}
+
+        // 4. Load from wida_registered_users_map (STRICT: only role === 'doctor')
+        try {
+            const rawReg = localStorage.getItem('wida_registered_users_map');
+            if (rawReg) {
+                const mapObj = JSON.parse(rawReg);
+                Object.values(mapObj).forEach(u => {
+                    if (u && u.role === 'doctor') {
+                        const norm = this._normalizeDoctor(u, true);
+                        if (norm) {
+                            const key = (norm.email || norm.id).toLowerCase();
+                            docMap.set(key, norm);
+                        }
+                    }
+                });
+            }
+        } catch {}
+
+        // 5. Load from wida_ecosystem_user (active logged-in user STRICTLY if doctor)
+        try {
+            const rawUser = localStorage.getItem('wida_ecosystem_user');
+            if (rawUser) {
+                const u = JSON.parse(rawUser);
+                if (u && u.role === 'doctor') {
+                    const norm = this._normalizeDoctor(u, true);
+                    if (norm) {
+                        const key = (norm.email || norm.id).toLowerCase();
+                        docMap.set(key, norm);
+                    }
+                }
+            }
+        } catch {}
+
+        // Convert to array and prioritize newly registered doctors
+        const allDocs = Array.from(docMap.values()).sort((a, b) => {
+            if (a.isRegistered && !b.isRegistered) return -1;
+            if (!a.isRegistered && b.isRegistered) return 1;
+            return 0;
+        });
+
+        return allDocs;
     }
 
     // Diagnostic Lab Tests

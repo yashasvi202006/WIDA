@@ -3,9 +3,10 @@
 
 [![Render Status](https://img.shields.io/badge/Render-Live%20Production-46E3B7?style=flat&logo=render&logoColor=white)](https://wida.onrender.com)
 [![Netlify Status](https://api.netlify.com/api/v1/badges/e8cfdf92-6298-4c90-95e2-2a2b72445e99/deploy-status)](https://wida-health.netlify.app)
+[![Java](https://img.shields.io/badge/Language-Java%2021%20LTS-ED8B00?style=flat&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Framework-Spring%20Boot%203-6DB33F?style=flat&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Vite](https://img.shields.io/badge/Vite-8.3.3-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.2.8-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
-[![NodeJS](https://img.shields.io/badge/Node.js-24.x-339933?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Database](https://img.shields.io/badge/SQLite-Relational%20Engine-003B57?style=flat&logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![Standards](https://img.shields.io/badge/Standards-ABDM%20%7C%20HL7%20FHIR%20%7C%20NABL-0D9488?style=flat)](#research-paper--academic-context)
 [![Tests](https://img.shields.io/badge/Automated%20Tests-33%20Passed-10B981?style=flat)](#verification--testing)
@@ -35,6 +36,7 @@
      - [4.4.2 Diagnostic Test Catalogue & Health Packages](#442-diagnostic-test-catalogue--comprehensive-health-checkup-packages)
    - [4.5 Central Pharmacy & Medication Dispensation (`WIDA.pharmacy`)](#45-central-pharmacy--medication-dispensation-widapharmacy)
      - [4.5.1 Real-Time Prescription Dispensation Queue](#451-real-time-prescription-dispensation-queue)
+   - [4.6 Universal 24/7 Clinical AI Assistant (`WIDA AI`)](#46-universal-247-clinical-ai-healthcare-assistant-wida-ai)
 5. [Academic Research Paper (Format)](#-academic-research-paper)
    - [Abstract & Problem Statement](#abstract)
    - [Architectural Paradigm & Standards Compliance](#architectural-paradigm--standards-compliance)
@@ -72,42 +74,74 @@ The WIDA application is deployed live with automated continuous integration and 
 🔗 **Live Primary URL (Render):** [https://wida.onrender.com](https://wida.onrender.com)  
 🔗 **Live Mirror URL (Netlify):** [https://wida-health.netlify.app](https://wida-health.netlify.app)
 
-### Direct Portal Deep-Links
+### ⚡ One-Click Windows Executable & Submission Launchers
 
-Each module can be accessed directly or transitioned dynamically through the client-side session bridge:
+WIDA provides native one-click execution binaries for evaluators and submission reviewers:
 
-| Domain | Direct URL Query | Demo Credentials | Primary Purpose |
-| :--- | :--- | :--- | :--- |
-| **Unified Gateway** | `/?login=true` | 1-Click Preset Buttons | Multi-role entry point with real-time backend telemetry |
-| **Patient Portal** | `/?portal=patient` | `yashasvi.saini@wida.health` / `wida2026` | ABHA vault, appointments, health records, emergency SOS |
-| **Doctor Workspace** | `/?portal=doctor` | `aarav.sharma@wida.org` / `Doctor@123` | Direct doctor clinical dashboard, 3D body diagnosis, EHR |
-| **Diagnostic Lab** | `/?portal=lab` | `director@healthfirst.lab` / `LabDirector@2026` | Specimen accessioning, NABL testing, certified reports |
-| **Central Pharmacy** | `/?portal=pharmacy` | `yogita.chugh@wida.health` / `password123` | Rx dispensation queue, medicine catalogue, order dispatch |
+1. **`WIDA_Launcher.exe`**: Compiled native Windows executable (built with C# .NET). Automatically boots the Java Patient Backend (8080), Lab Diagnostic REST API (8082), Vite Frontend (5173), and opens `http://localhost:5173/?login=true` in your default browser.
+2. **`START_WIDA_ECOSYSTEM.bat`**: Windows batch launcher with real-time process monitoring, automated dependency verification, and multi-portal telemetry.
+
+### 2.1 Unified 4-Demo-Account Matrix Per Portal (16 Total Accounts)
+
+Each module maintains **strictly isolated authentication and credentials**. An account registered as a Patient cannot log into the Doctor, Lab, or Pharmacy portals, ensuring clinical compliance. The ecosystem includes **4 pre-configured verified demo profiles for every portal (16 total)** with 1-click autofill and instant sign-in:
+
+#### 👤 Patient Portal (`/?portal=patient`) — ABDM ABHA Identities
+| Demo # | Patient Name | Work / Personal Email | ABHA Identification | Password | Clinical Persona & Profile |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Demo 1** | **Yashasvi Saini** | `patient@wida.health` | `91-4521-8902-3341` | `password123` | Age 24, Male, B+ • Active Care, Stage 1 Hypertension |
+| **Demo 2** | **Ananya Sengupta** | `ananya.patient@wida.health` | `91-8820-1923-4512` | `password123` | Age 32, Female, O+ • Type 2 Diabetes & Routine Lab Screening |
+| **Demo 3** | **Rahul Verma** | `rahul.patient@wida.health` | `91-7712-4091-6623` | `password123` | Age 42, Male, A+ • Post-Stent Arterial Follow-up & Lipid Panel |
+| **Demo 4** | **Priya Deshmukh** | `priya.patient@wida.health` | `91-6304-5519-8834` | `password123` | Age 36, Female, AB+ • Mild Asthma & Allergen Profiling |
+
+#### 🩺 Doctor Workspace (`/?portal=doctor`) — Medical Council Identities
+| Demo # | Doctor Name | Professional Email | Medical Reg (MCI/NMC) | Password | Specialization & Hospital Clinic |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Demo 1** | **Dr. Aarav Sharma** | `dr.aarav@wida.health` | `MCI-2009-48291` | `Doctor@123` | Senior Cardiologist • Apex Heart & Vascular Institute (ID: 1) |
+| **Demo 2** | **Dr. Ananya Verma** | `dr.ananya@wida.health` | `MCI-2012-39201` | `Doctor@123` | Orthopedic Surgeon • City Bone & Joint Clinic (ID: 2) |
+| **Demo 3** | **Dr. Rohan Mehta** | `dr.rohan@wida.health` | `MCI-2007-88231` | `Doctor@123` | Consultant Neurologist • Metro Neuro Care Hospital (ID: 3) |
+| **Demo 4** | **Dr. Kavya Singh** | `dr.kavya@wida.health` | `MCI-2015-11029` | `Doctor@123` | Consultant Dermatologist • Aura Skin & Hair Clinic (ID: 4) |
+
+#### 🔬 Diagnostic Laboratory (`/?portal=lab`) — NABL ISO 15189 Identities
+| Demo # | Staff Member | Facility Email | NABL License / ID | Password | Role & Signatory Responsibility |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Demo 1** | **Dr. Sunita Deshmukh, MD** | `director@healthfirst.lab` | `NABL-ISO-48291` | `LabDirector@2026` | Lab Director & Chief Signatory (HealthFirst Labs) |
+| **Demo 2** | **Dr. Rajeshwar Prasad, MD** | `pathologist@healthfirst.lab` | `NABL-ISO-48291` | `LabDirector@2026` | Senior Consultant Pathologist & Diagnostic Verifier |
+| **Demo 3** | **Vikramaditya Rao, B.Sc MLT**| `technician@healthfirst.lab` | `NABL-ISO-48291` | `LabDirector@2026` | Senior Clinical Biochemist & Quality Technologist |
+| **Demo 4** | **Anjali Sharma, DMLT** | `phlebotomist@healthfirst.lab` | `NABL-ISO-48291` | `LabDirector@2026` | Specimen Accessioner & Certified Phlebotomist |
+
+#### 💊 Central Pharmacy (`/?portal=pharmacy`) — Drug License Identities
+| Demo # | Pharmacist Name | Pharmacy Email | Drug License Reg | Password | Role & Dispensing Scope |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Demo 1** | **Dr. Yogita Chugh** | `yogita.chugh@wida.health` | `WIDA-PH-8092` | `password123` | Head Pharmacist & Medical Director (WIDA Central Pharmacy) |
+| **Demo 2** | **Dr. Rahul Singhania** | `rahul.pharma@wida.health` | `WIDA-PH-4409` | `password123` | Senior Clinical Pharmacist (Dispensing & Stock Verification) |
+| **Demo 3** | **Priya Sharma** | `priya.pharma@wida.health` | `WIDA-PH-5112` | `password123` | Assistant Pharmacist & Counter Chemist |
+| **Demo 4** | **Sanjay Kumar** | `sanjay.pharma@wida.health` | `WIDA-PH-9020` | `password123` | Inventory Specialist & Schedule H1 Compliance Officer |
 
 ---
 
 ## 🏗 Ecosystem Architecture & Data Interoperability
 
-WIDA utilizes an asynchronous, event-driven architecture coupled with an in-memory cross-module bridge (`widaBridge`). This design guarantees zero data loss and transparent offline/online operation.
+WIDA utilizes an asynchronous, event-driven architecture coupled with an in-memory cross-module bridge (`widaBridge`). Real patient inputs, bookings, and prescriptions coexist dynamically with seeded clinical baseline data across all portals:
 
 ```mermaid
 graph TD
-    User([Healthcare Actors: Patient, Doctor, Lab, Chemist]) --> Gateway[Unified Auth Gateway & RBAC Token Authority]
+    User([Healthcare Actors: Patient, Doctor, Lab, Pharmacist]) --> Gateway[Unified Auth Gateway & RBAC Token Authority]
     
-    Gateway --> PP[Patient Portal: ABHA & Vault]
-    Gateway --> DW[Doctor Workspace: Clinical EHR]
-    Gateway --> DL[Diagnostic Laboratory: NABL Lab]
-    Gateway --> CP[Central Pharmacy: Dispensation]
+    Gateway --> PP[Patient Portal: ABHA & Medical Vault]
+    Gateway --> DW[Doctor Workspace: Clinical EHR & Teleconsult]
+    Gateway --> DL[Diagnostic Laboratory: NABL Lab & Accessioning]
+    Gateway --> CP[Central Pharmacy: Prescription Dispensation]
     
-    PP <--> |widaBridge / Shared JSON Store| DW
-    DW --> |Diagnostic Test Orders| DL
-    DW --> |e-Prescription Orders| CP
-    DL --> |Certified Pathological Reports| PP
-    CP --> |Medicine Dispensation Status| PP
+    PP <--> |wida_shared_appointments / Events| DW
+    PP --> |wida_shared_lab_bookings / SQLite REST| DL
+    DW --> |wida_shared_prescriptions| CP
+    PP --> |wida_shared_pharmacy_orders| CP
+    DL --> |Certified Pathological Reports & Amendments| PP
+    CP --> |Dispensation Verification & Stock Tracking| PP
     
-    DL --> LabDB[(SQLite: lab.db - 15 Tables)]
-    PP --> PatDB[(SQLite / MSW: patient.db)]
-    DW --> DocDB[(MySQL / JPA: meditrack_db)]
+    DL --> LabDB[(SQLite: lab.db - Port 8082)]
+    PP --> PatDB[(Java 21 Virtual Threads SQLite: patient.db - Port 8080)]
+    DW --> DocDB[(Doctor Data Store & Transparent Offline Bridge)]
 ```
 
 ---
@@ -119,10 +153,16 @@ The Unified Gateway serves as the centralized authorization clearinghouse. Users
 
 ![Unified Authentication Gateway](docs/screenshots/01_unified_auth_gateway.png)
 
+#### 4.1.1 Strict Role Isolation & Verification Guard
+Each of the 4 ecosystem portals maintains strict authentication separation. Unregistered attempts are blocked, and cross-role logins (e.g. attempting to log into Doctor or Lab using Patient credentials) are rejected with clear instructional feedback directing users to their appropriate portal:
+
+![Authentication Security & Role Isolation](docs/screenshots/15_auth_security_role_isolation.png)
+
 *Key Highlights:*
-- Dynamic workspace theme shifting tailored to role color codes (Blue for Patient, Emerald for Doctor, Teal for Lab, Green for Pharmacy).
-- Real-time backend status monitors for Ports 8080 (Patient), 8081 (Doctor), 8082 (Lab REST), and Pharmacy Catalog.
-- Form validation with medical council registration verification and laboratory accreditation tags.
+- **Distinct Multi-Role RBAC**: Separate credentials, databases, and permission boundaries for Patient, Doctor, Lab, and Pharmacy.
+- **Dynamic Workspace Theme Shifting**: Color-coded workspace cues (Teal for Patient, Emerald for Doctor, Seafoam for Lab, Green for Pharmacy).
+- **Live Ecosystem Telemetry**: Real-time status monitors for Java DB 8080 (Patient), Lab REST 8082, and Pharmacy stores.
+- **Credential Validation**: Enforces valid ABHA IDs, NMC/MCI registration numbers, NABL ISO license keys, and CDSCO drug licenses.
 
 ---
 
@@ -209,10 +249,28 @@ The Central Pharmacy module links doctor e-prescriptions directly with hospital 
 Live queue synchronizing digital prescriptions from the Doctor Module with hospital stock availability and packaging verification.
 ![Central Pharmacy Dispensation](docs/screenshots/07_central_pharmacy_dispensation.png)
 
+#### 4.5.2 Cross-Module Prescription Sync & Inventory Audit
+Verified prescriptions arrive seamlessly in the dispensation tray with auto-calculated prices, stock checks, and batch allocation:
+![Prescription Dispensation & Stock Sync](docs/screenshots/16_pharmacy_prescription_sync.png)
+
 *Key Highlights:*
 - Real-time prescription inbox syncing electronically generated prescriptions from the Doctor module.
-- Batch, expiry date, and inventory stock monitoring.
+- Batch, expiry date, and inventory stock monitoring with GPP compliance.
 - Patient delivery and pickup state transitions with digital invoice generation.
+
+---
+
+### 4.6 Universal 24/7 Clinical AI Healthcare Assistant (`WIDA AI`)
+Operating across all 4 portals via a global floating trigger and contextual topbar navigation buttons, the **WIDA Clinical AI Assistant** delivers high-fidelity clinical and diagnostic guidance tailored to the active user role:
+
+![Universal AI Healthcare Assistant](docs/screenshots/14_universal_ai_healthcare_assistant.png)
+
+*Multi-Domain AI Intelligence Engines:*
+- **🩺 For Doctors**: Differential diagnoses, AHA/ACC hypertension protocols, KDIGO 2024 renal dosage adjustments for eGFR thresholds, and drug-drug interaction matrix analyses (e.g. Telmisartan + Atorvastatin + Metformin).
+- **🧪 For Diagnostic Labs**: NABL ISO 15189 reference and critical panic ranges, vacutainer tube selection guidance, hemolyzed sample rejection protocols, and Westgard multi-rule quality control troubleshooting.
+- **💊 For Pharmacists**: Pharmacotherapy screening, contraindication alerts, bioequivalent generic substitution recommendations, and CDSCO Schedule H1 antibiotic compliance rules.
+- **👤 For Patients**: Jargon-free explanations of CBC blood counts and lipid profiles, medication timing instructions, consultation question checklists, and cardiovascular lifestyle advice.
+- **Fail-Safe Operation**: Live integration with Google Gemini Flash API coupled with a local clinical rule engine guaranteeing instant answers with zero downtime.
 
 ---
 
@@ -259,8 +317,8 @@ WIDA treats every subsystem boundary with Zero-Trust principles:
 │  widaBridge  •  CustomEvent Subscriptions  •  Browser MSW Service      │
 ├────────────────────────────────────────────────────────────────────────┤
 │                     MICROSERVICES & API GATEWAY                        │
-│  Node.js 24 Express (Port 8082)  •  Spring Boot Java (Port 8081)       │
-│  Java REST Service (Port 8080)   •  MSW REST Mock Interceptor          │
+│  Java 21 Enterprise Virtual Threads (Port 8080) • Spring Boot (Port 8081)│
+│  Diagnostic Laboratory REST Engine (Port 8082) • SQLite Persistence      │
 ├────────────────────────────────────────────────────────────────────────┤
 │                          PERSISTENCE LAYER                             │
 │  SQLite (lab.db: 15 Tables)  •  SQLite (patient.db)  •  localStorage   │
@@ -321,8 +379,8 @@ The laboratory relational core (`lab/database/lab.db`) is structured across 15 r
 ## 💻 Local Installation, Setup & Verification
 
 ### Prerequisites
-- **Node.js**: Version 18.x, 20.x, or 24.x LTS
-- **npm**: Version 9.x or higher
+- **Java Development Kit (JDK)**: Version 21 LTS (Oracle OpenJDK or Microsoft Build of OpenJDK)
+- **Node.js & npm**: Node.js 20.x/24.x LTS (for Vite UI build and tooling)
 - **PowerShell** (Windows) or **Bash** (macOS/Linux)
 
 ### 1. Clone the Repository
@@ -337,19 +395,36 @@ git checkout develop
 npm install
 ```
 
-### 3. Launch the Application
-Start the unified client frontend dev server:
-```bash
-npm run dev
-```
-The application will launch at `http://localhost:5173`.
+### 3. One-Click Automated Launch (Recommended)
+You can launch the entire ecosystem (Patient Java Backend + Lab REST API + Frontend Dev Server) with a single command or double-click:
 
-### 4. (Optional) Run the Diagnostic Laboratory REST Backend
-In a separate terminal window:
+**Option A — Windows Native Executable (Zero Setup):**
+Double-click `WIDA_Launcher.exe` in the project root directory.
+
+**Option B — Windows Batch Launcher:**
+```cmd
+START_WIDA_ECOSYSTEM.bat
+```
+
+### 4. Manual Service-by-Service Startup (Alternative)
+If you prefer running services individually across separate terminal tabs:
+
+**Terminal 1 — Patient Java Backend (Port 8080):**
+```powershell
+cd src/modules/patient/backend
+java -cp "bin;lib/*" com.wida.patient.backend.PatientBackendServer
+```
+
+**Terminal 2 — Diagnostic Laboratory REST Backend (Port 8082):**
 ```powershell
 node lab/backend/server.js
 ```
-The Node.js Express REST API and SQLite engine will initialize at `http://localhost:8082`.
+
+**Terminal 3 — Unified Client Frontend (Port 5173):**
+```bash
+npm run dev
+```
+Open `http://localhost:5173/?login=true` in your browser.
 
 ### 5. Automated Verification Test Suite
 Run the 33-test automated LIMS and integration verification suite:

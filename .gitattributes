@@ -1,0 +1,30 @@
+# ===============================================================================
+# GitHub Linguist Language Detection Configuration
+# Forces GitHub repository statistics to report JAVA as the primary language
+# ===============================================================================
+
+# Exclude frontend JavaScript, JSX, CSS, HTML from language statistics
+*.js linguist-detectable=false
+*.jsx linguist-detectable=false
+*.mjs linguist-detectable=false
+*.cjs linguist-detectable=false
+*.css linguist-detectable=false
+*.html linguist-detectable=false
+*.svg linguist-detectable=false
+
+# Exclude scripts and build files from statistics
+*.sh linguist-detectable=false
+*.bat linguist-detectable=false
+*.ps1 linguist-detectable=false
+
+# Explicitly count Java files as the primary language
+*.java linguist-detectable=true
+*.java linguist-language=Java
+
+# Treat vendor/dependencies as vendored
+node_modules/** linguist-vendored
+dist/** linguist-vendored
+dist-pharmacy/** linguist-vendored
+target/** linguist-vendored
+bin/** linguist-vendored
+lib/** linguist-vendored

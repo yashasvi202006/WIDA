@@ -73,6 +73,26 @@ export const PharmacyDashboard = ({ onLogout }) => {
     useEffect(() => { saveReturns(returns); }, [returns]);
     useEffect(() => { saveNotifications(notifications); }, [notifications]);
 
+    // Reactive ecosystem synchronization
+    useEffect(() => {
+        const handleOrderSync = () => {
+            const loaded = loadCustomerOrders();
+            if (loaded.length > 0) setOrders(loaded);
+        };
+        const handleRxSync = () => {
+            const loaded = loadPrescriptions();
+            if (loaded.length > 0) setPrescriptions(loaded);
+        };
+        window.addEventListener('wida:pharmacy-order-created', handleOrderSync);
+        window.addEventListener('wida:prescription-created', handleRxSync);
+        window.addEventListener('storage', handleOrderSync);
+        return () => {
+            window.removeEventListener('wida:pharmacy-order-created', handleOrderSync);
+            window.removeEventListener('wida:prescription-created', handleRxSync);
+            window.removeEventListener('storage', handleOrderSync);
+        };
+    }, []);
+
     // Selected state for workflow navigation
     const [selectedRxForDispense, setSelectedRxForDispense] = useState(null);
 
@@ -181,6 +201,9 @@ export const PharmacyDashboard = ({ onLogout }) => {
             },
             ...prev
         ]);
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('wida:prescription-dispensed', { detail: { rxId } }));
+        }
     };
 
     // Counter Sales Handler
@@ -224,6 +247,9 @@ export const PharmacyDashboard = ({ onLogout }) => {
     // Customer Orders Handler
     const handleUpdateOrderStatus = (orderId, status) => {
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: status } : o));
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('wida:pharmacy-order-updated', { detail: { orderId, status } }));
+        }
     };
 
     // Returns Handler

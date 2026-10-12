@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { WidaAIAssistantModal } from '../../components/WidaAIAssistantModal.jsx';
+
 export const TopNav = ({ doctor, allDoctors, onSwitchDoctor, unreadCount, onOpenNotifications, onOpenProfile, onToggleMobileMenu, }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const menuRef = useRef(null);
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -38,8 +41,28 @@ export const TopNav = ({ doctor, allDoctors, onSwitchDoctor, unreadCount, onOpen
         </div>
       </div>
 
-      {/* Right: Verification badge + notifications + profile */}
+      {/* Right: Verification badge + AI assistant + notifications + profile */}
       <div className="doc-topnav-right">
+        {/* AI Assistant Button */}
+        <button
+          type="button"
+          className="doc-btn doc-btn-outline doc-btn-sm"
+          onClick={() => setIsAiModalOpen(true)}
+          style={{
+            background: 'linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(99, 102, 241, 0.15) 100%)',
+            borderColor: 'rgba(13, 148, 136, 0.35)',
+            color: 'var(--doc-primary-dark)',
+            fontWeight: 700,
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+          title="Open WIDA AI Clinical Assistant"
+        >
+          <span>🤖</span> AI Clinical Assistant
+        </button>
+
         {/* Verification Status */}
         <span className={`doc-badge ${doctor.verificationStatus === 'VERIFIED'
             ? 'doc-badge-verified'
@@ -139,5 +162,11 @@ export const TopNav = ({ doctor, allDoctors, onSwitchDoctor, unreadCount, onOpen
             </div>)}
         </div>
       </div>
+
+      <WidaAIAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        initialDomain="doctor"
+      />
     </header>);
 };

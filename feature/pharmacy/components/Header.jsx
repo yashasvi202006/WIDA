@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { WidaAIAssistantModal } from '../../../src/components/WidaAIAssistantModal.jsx';
 
 export const Header = ({
     notifications,
@@ -11,9 +12,10 @@ export const Header = ({
 }) => {
     const [showNotifDropdown, setShowNotifDropdown] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    const doctorName = currentUser?.fullName || 'Dr. Yogita Chugh';
+    const doctorName = currentUser?.fullName || currentUser?.name || 'Dr. Yogita Chugh';
     const initials = doctorName
         .split(' ')
         .map(n => n[0])
@@ -59,7 +61,7 @@ export const Header = ({
                 <button
                     style={headerStyles.aiButton}
                     title="Open WIDA AI Healthcare Assistant"
-                    onClick={() => alert('🤖 WIDA AI Healthcare Assistant ready! Ask about drug interactions, dosage calculators, or inventory forecasts.')}
+                    onClick={() => setIsAiModalOpen(true)}
                 >
                     <span>🤖</span> AI Assistant
                 </button>
@@ -137,6 +139,12 @@ export const Header = ({
                     <span style={headerStyles.doctorNameText}>{doctorName}</span>
                 </div>
             </div>
+
+            <WidaAIAssistantModal
+                isOpen={isAiModalOpen}
+                onClose={() => setIsAiModalOpen(false)}
+                initialDomain="pharmacy"
+            />
         </header>
     );
 };

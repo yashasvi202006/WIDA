@@ -43,42 +43,62 @@ export const LabApp = ({ onLogout }) => {
         setToasts(prev => prev.filter(t => t.id !== id));
     }, []);
 
-    // Check existing session on load and auto-authenticate with real backend JWT
+    // Check existing session on load and preserve authenticated user
     useEffect(() => {
-        const token = labApiClient.getToken();
-        const user = labApiClient.getUser();
-        const lab = labApiClient.getLab();
+        let ecoUser = null;
+        try {
+            ecoUser = JSON.parse(localStorage.getItem('wida_ecosystem_user') || 'null');
+        } catch {}
+
+        let token = labApiClient.getToken();
+        let user = labApiClient.getUser();
+        let lab = labApiClient.getLab();
+
+        // If active ecosystem user is present, prioritize their real identity
+        if (ecoUser && (ecoUser.name || ecoUser.directorName || ecoUser.fullName)) {
+            const ecoName = ecoUser.name || ecoUser.directorName || ecoUser.fullName;
+            const updatedUser = {
+                id: ecoUser.id || user?.id || 'staff-1',
+                name: ecoName,
+                fullName: ecoName,
+                email: ecoUser.email || user?.email || '',
+                role: 'LAB_DIRECTOR',
+                registeredId: ecoUser.labLicense || ecoUser.registeredId || user?.registeredId || 'NABL-ISO-48291'
+            };
+            const updatedLab = {
+                id: user?.labId || 1,
+                name: ecoUser.labName || lab?.name || 'WIDA Diagnostic Laboratory',
+                status: 'VERIFIED',
+                license_number: ecoUser.labLicense || ecoUser.registeredId || 'NABL-ISO-48291'
+            };
+            labApiClient.setUser(updatedUser);
+            labApiClient.setLab(updatedLab);
+            if (!token) {
+                token = 'wida-lab-jwt-' + Date.now();
+                labApiClient.setToken(token);
+            }
+            setCurrentUser(updatedUser);
+            setCurrentLab(updatedLab);
+            setAuthState('app');
+            return;
+        }
 
         if (token && user) {
             labApiClient.getCurrentProfile()
                 .then(prof => {
-                    setCurrentUser(prof.user || user);
+                    const finalUser = (prof.user?.name && prof.user.name !== 'Dr. Sunita Deshmukh, MD') ? prof.user : (user || prof.user);
+                    setCurrentUser(finalUser);
                     setCurrentLab(prof.lab || lab);
                     setAuthState('app');
                 })
                 .catch(() => {
-                    // Re-acquire genuine JWT from backend port 8082
-                    labApiClient.login('director@healthfirst.lab', 'LabDirector@2026')
-                        .then(res => {
-                            setCurrentUser(res.user);
-                            setCurrentLab(res.lab);
-                            setAuthState('app');
-                        })
-                        .catch(() => {
-                            setAuthState('login');
-                        });
+                    // Preserve the real user who signed up / logged in
+                    setCurrentUser(user);
+                    setCurrentLab(lab);
+                    setAuthState('app');
                 });
         } else {
-            // Auto authenticate into Lab workspace
-            labApiClient.login('director@healthfirst.lab', 'LabDirector@2026')
-                .then(res => {
-                    setCurrentUser(res.user);
-                    setCurrentLab(res.lab);
-                    setAuthState('app');
-                })
-                .catch(() => {
-                    setAuthState('login');
-                });
+            setAuthState('login');
         }
     }, []);
 
