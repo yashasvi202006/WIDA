@@ -167,31 +167,31 @@ sequenceDiagram
     actor Pharmacy as Central Pharmacy (WIDA.pharmacy)
     actor SOS as Emergency Trauma (WIDA.sos)
 
-    Note over Patient,Doctor: Step 1: Encounter Booking & Consent
-    Patient->>Doctor: Books Appointment & Grants Temporary ABHA EHR Consent
-    Doctor->>Doctor: Accepts Appointment; Loads Patient Longitudinal History & 3D Anatomy
+    Note over Patient,Doctor: Step 1: Encounter Booking and Consent
+    Patient->>Doctor: Books Appointment and Grants Temporary ABHA Consent
+    Doctor->>Doctor: Accepts Appointment, Loads Patient History and 3D Anatomy
 
     Note over Doctor,Patient: Step 2: Clinical Consultation
-    Doctor->>Doctor: Conducts Encounter; Records Clinical Remarks & Diagnosis
-    Doctor->>Pharmacy: Transmits Cryptographically Signed E-Prescription (Rx)
-    Doctor->>Lab: Issues Diagnostic Lab Investigation Order (e.g., Lipid + HbA1c)
+    Doctor->>Doctor: Conducts Encounter, Records Clinical Remarks and Diagnosis
+    Doctor->>Pharmacy: Transmits Cryptographically Signed E-Prescription
+    Doctor->>Lab: Issues Diagnostic Lab Investigation Order
     Doctor->>Patient: Issues Digital Encounter Summary to Patient Health Vault
 
     Note over Lab,Patient: Step 3: Diagnostic Laboratory Fulfillment
-    Lab->>Lab: Accessions Specimen with Barcode & Tri-Color Tube (EDTA/SST)
-    Lab->>Lab: Runs Analytical Diagnostics; Pathologist Signs & Verifies Report
+    Lab->>Lab: Accessions Specimen with Barcode and Tri-Color Tube
+    Lab->>Lab: Runs Analytical Diagnostics, Pathologist Signs and Verifies Report
     Lab-->>Patient: Publishes Cryptographically Locked Digital Diagnostic Report
     Lab-->>Doctor: Updates Patient EHR with Verified Lab Results
 
     Note over Pharmacy,Patient: Step 4: Central Pharmacy Dispensation
-    Pharmacy->>Pharmacy: Ingests Prescription; Verifies Schedule H1 Antibiotic Compliance
-    Pharmacy->>Pharmacy: Decrements Inventory; Packages Medication with Dosage Label
-    Pharmacy-->>Patient: Dispenses Medication; Emits Dispensation Audit Receipt
+    Pharmacy->>Pharmacy: Ingests Prescription, Verifies Schedule H1 Compliance
+    Pharmacy->>Pharmacy: Decrements Inventory, Packages Medication with Dosage Label
+    Pharmacy-->>Patient: Dispenses Medication, Emits Dispensation Audit Receipt
 
-    Note over Patient,SOS: Step 5: Critical Emergency SOS (Trigger-on-Demand)
+    Note over Patient,SOS: Step 5: Critical Emergency SOS
     Patient->>SOS: Triggers 7-Stage Emergency Alert
-    SOS->>SOS: Pulls Blood Group, Chronic Allergies & GPS Coordinates
-    SOS->>Doctor: Notifies Nearest Trauma Center & Emergency Response Unit
+    SOS->>SOS: Pulls Blood Group, Chronic Allergies and GPS Coordinates
+    SOS->>Doctor: Notifies Nearest Trauma Center and Emergency Response Unit
 ```
 
 ### Detailed Integration Mechanics
@@ -213,21 +213,21 @@ The Patient Module serves as the patient's personal electronic health vault and 
 ```mermaid
 stateDiagram-v2
     [*] --> Unregistered
-    Unregistered --> ABHA_Verification: Enter Aadhaar / Mobile
-    ABHA_Verification --> Active_Profile: OTP Authenticated & Consent Approved
+    Unregistered --> ABHA_Verification: Enter Aadhaar or Mobile
+    ABHA_Verification --> Active_Profile: OTP Authenticated and Consent Approved
     
     state Active_Profile {
         [*] --> Dashboard
-        Dashboard --> Find_Doctors: Search Specialty / City / System (Allopathy/AYUSH)
-        Find_Doctors --> Book_Slot: Select Date & Time Slot
-        Book_Slot --> Appointment_Confirmed: Instant Slot Locking & Notification
+        Dashboard --> Find_Doctors: Search Specialty or City or AYUSH
+        Find_Doctors --> Book_Slot: Select Date and Time Slot
+        Book_Slot --> Appointment_Confirmed: Instant Slot Locking and Notification
         
         Dashboard --> Health_Records: View Longitudinal EHR Vault
         Health_Records --> View_Lab_Reports: Interactive Diagnostic Gauges
-        Health_Records --> View_Prescriptions: Active Medications & Refill Requests
+        Health_Records --> View_Prescriptions: Active Medications and Refill Requests
         
-        Dashboard --> Wellness_Tracker: Sync Wearable / Daily Routine
-        Dashboard --> Government_Schemes: Search PM-JAY / State Benefits
+        Dashboard --> Wellness_Tracker: Sync Wearable and Daily Routine
+        Dashboard --> Government_Schemes: Search PM-JAY and State Benefits
     }
     
     Active_Profile --> Emergency_Triggered: SOS Panic Button Pressed
@@ -248,25 +248,25 @@ The Doctor Module equips medical practitioners with an enterprise clinical cockp
 ```mermaid
 stateDiagram-v2
     [*] --> Doctor_Registration
-    Doctor_Registration --> Credential_Review: Upload MCI/NMC Degree & State License
+    Doctor_Registration --> Credential_Review: Upload MCI or NMC Degree and License
     Credential_Review --> Verified_Practitioner: Verification Approved
     
     state Verified_Practitioner {
         [*] --> Clinical_Queue
-        Clinical_Queue --> Appointment_Management: Accept / Reject / Reschedule
+        Clinical_Queue --> Appointment_Management: Accept or Reject or Reschedule
         Appointment_Management --> Active_Consultation: Patient Checks In
         
         state Active_Consultation {
             [*] --> Review_Patient_History
-            Review_Patient_History --> Interactive_3D_Anatomy: Tag Pathologies & Organs
-            Interactive_3D_Anatomy --> Clinical_Encounter_Notes: Record Symptoms & Vitals
-            Clinical_Encounter_Notes --> E_Prescription_Builder: Select Formulations & Schedule
-            E_Prescription_Builder --> Diagnostic_Order: Request CBC / Lipid / CT-Scan
-            Diagnostic_Order --> Consultation_Complete: Push to Pharmacy & Lab
+            Review_Patient_History --> Interactive_3D_Anatomy: Tag Pathologies and Organs
+            Interactive_3D_Anatomy --> Clinical_Encounter_Notes: Record Symptoms and Vitals
+            Clinical_Encounter_Notes --> E_Prescription_Builder: Select Formulations and Schedule
+            E_Prescription_Builder --> Diagnostic_Order: Request Lab Diagnostic Test
+            Diagnostic_Order --> Consultation_Complete: Push to Pharmacy and Lab
         }
         
-        Clinical_Queue --> Practitioner_Profile: Update Clinic Hours & Consultation Fees
-        Practitioner_Profile --> Achievements_Rankings: View Verified Patient Count & Badges
+        Clinical_Queue --> Practitioner_Profile: Update Clinic Hours and Fees
+        Practitioner_Profile --> Achievements_Rankings: View Verified Patient Count and Badges
     }
 ```
 
@@ -290,25 +290,25 @@ stateDiagram-v2
     
     state Active_LIMS {
         [*] --> Inbound_Test_Orders
-        Inbound_Test_Orders --> Specimen_Accessioning: Assign 12-Digit Barcode & Tri-Color Tube
+        Inbound_Test_Orders --> Specimen_Accessioning: Assign 12-Digit Barcode and Tri-Color Tube
         
         state Specimen_Accessioning {
             [*] --> Tube_Selection
-            Tube_Selection --> Lavender_EDTA: Hematology (CBC/ESR)
-            Tube_Selection --> Gold_SST: Biochemistry & Serology
-            Tube_Selection --> Grey_NaF: Blood Glucose & Lactate
+            Tube_Selection --> Lavender_EDTA: Hematology CBC and ESR
+            Tube_Selection --> Gold_SST: Biochemistry and Serology
+            Tube_Selection --> Grey_NaF: Blood Glucose and Lactate
         }
         
-        Specimen_Accessioning --> Quality_Check: Inspect Specimen Volume & Hemolysis
-        Quality_Check --> Specimen_Rejected: Hemolyzed / Clotted / Insufficient (Audit Logged)
-        Quality_Check --> Processing: Centrifugation & Automated Analyzer
+        Specimen_Accessioning --> Quality_Check: Inspect Specimen Volume and Quality
+        Quality_Check --> Specimen_Rejected: Hemolyzed or Clotted or Insufficient
+        Quality_Check --> Processing: Centrifugation and Automated Analyzer
         
         Processing --> Draft_Report: Enter Numerical Findings
         Draft_Report --> Verification_Gate: Pathologist Clinical Review
-        Verification_Gate --> Report_Published: Locked & Digitally Stamped
+        Verification_Gate --> Report_Published: Locked and Digitally Stamped
         
         Report_Published --> Versioned_Amendment: Error Correction with Addendum
-        Report_Published --> Automated_Billing: Invoicing & Receipt Generation
+        Report_Published --> Automated_Billing: Invoicing and Receipt Generation
     }
 ```
 
@@ -330,25 +330,25 @@ The Pharmacy Module connects electronic prescriptions directly to physical or di
 ```mermaid
 stateDiagram-v2
     [*] --> Pharmacy_Registration
-    Pharmacy_Registration --> Drug_License_Verification: Validate State FDA / Form 20B/21B
+    Pharmacy_Registration --> Drug_License_Verification: Validate State FDA or Form 20B 21B
     Drug_License_Verification --> Active_Dispensary: Licensed Dispensary
     
     state Active_Dispensary {
         [*] --> Incoming_Prescription_Queue
-        Incoming_Prescription_Queue --> Prescription_Validation: Verify Doctor Reg & Patient ID
+        Incoming_Prescription_Queue --> Prescription_Validation: Verify Doctor Reg and Patient ID
         
         state Prescription_Validation {
-            [*] --> Schedule_H1_Check: Contains Antibiotics / Psychotropics?
-            Schedule_H1_Check --> Flag_Schedule_H1: Require Patient Aadhaar & Doctor ID Log
+            [*] --> Schedule_H1_Check: Contains Antibiotics or Psychotropics
+            Schedule_H1_Check --> Flag_Schedule_H1: Require Patient Aadhaar and Doctor ID Log
             Schedule_H1_Check --> Standard_Check: General Therapeutics
         }
         
-        Prescription_Validation --> Inventory_Allocation: Match Batch Numbers & Expiry Dates
+        Prescription_Validation --> Inventory_Allocation: Match Batch Numbers and Expiry Dates
         Inventory_Allocation --> Out_of_Stock: Alternative Generic Suggestion
         Inventory_Allocation --> Packing_Dispensation: Decrement Physical Inventory
         
-        Packing_Dispensation --> Dispense_Complete: Generate Tax Invoice & Dose Directions
-        Dispense_Complete --> Patient_Record_Update: Mark Rx as "Fulfilled" in Health Vault
+        Packing_Dispensation --> Dispense_Complete: Generate Tax Invoice and Dose Directions
+        Dispense_Complete --> Patient_Record_Update: Mark Rx as Fulfilled in Health Vault
     }
 ```
 
@@ -373,8 +373,8 @@ sequenceDiagram
     participant Fleet as Emergency Ambulance Fleet
     participant Trauma as Nearest Trauma Center ER
 
-    Caller->>Gateway: Triggers Emergency SOS (1-Tap Panic)
-    Gateway->>Geocoder: Requests Lat/Long Coordinates
+    Caller->>Gateway: Triggers Emergency SOS One-Tap Panic
+    Gateway->>Geocoder: Requests Lat and Long Coordinates
     Geocoder-->>Gateway: Precise Coordinates Resolved (Lat 28.6139 N, Long 77.2090 E)
     Gateway->>Gateway: Extracts Patient Baseline (Blood Group B+, Allergies, Cardiac History)
     
@@ -387,7 +387,7 @@ sequenceDiagram
     
     Gateway-->>Caller: Displays Live Ambulance Radar Map and Paramedic Direct Line
     Fleet->>Trauma: Paramedic Arrival at Scene, En Route, and Hospital Handover
-    Trauma->>Gateway: Closes Emergency Incident; Ingests Field Vitals into Patient EHR
+    Trauma->>Gateway: Closes Emergency Incident, Ingests Field Vitals into Patient EHR
 ```
 
 #### The 7-Stage Emergency Protocol (From Specification PDF):
