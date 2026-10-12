@@ -161,11 +161,11 @@ The fundamental thesis of WIDA is that healthcare is a continuous journey, not a
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Patient as 👤 Patient (WIDA.health)
-    actor Doctor as 🩺 Doctor (WIDA.doc)
-    actor Lab as 🔬 Diagnostic Lab (WIDA.lab)
-    actor Pharmacy as 💊 Central Pharmacy (WIDA.pharmacy)
-    actor SOS as 🚑 Emergency Trauma (WIDA.sos)
+    actor Patient as Patient (WIDA.health)
+    actor Doctor as Doctor (WIDA.doc)
+    actor Lab as Diagnostic Lab (WIDA.lab)
+    actor Pharmacy as Central Pharmacy (WIDA.pharmacy)
+    actor SOS as Emergency Trauma (WIDA.sos)
 
     Note over Patient,Doctor: Step 1: Encounter Booking & Consent
     Patient->>Doctor: Books Appointment & Grants Temporary ABHA EHR Consent
@@ -367,26 +367,26 @@ The Emergency Alert Module is an ultra-reliable, low-friction lifeline engineere
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Caller as 🆘 Patient / Bystander
-    participant Gateway as ⚡ WIDA Emergency Switch
-    participant Geocoder as 📍 GPS Geolocation Engine
-    participant Fleet as 🚑 Emergency Ambulance Fleet
-    participant Trauma as 🏥 Nearest Trauma Center ER
+    actor Caller as Patient / Bystander
+    participant Gateway as WIDA Emergency Switch
+    participant Geocoder as GPS Geolocation Engine
+    participant Fleet as Emergency Ambulance Fleet
+    participant Trauma as Nearest Trauma Center ER
 
     Caller->>Gateway: Triggers Emergency SOS (1-Tap Panic)
     Gateway->>Geocoder: Requests Lat/Long Coordinates
-    Geocoder-->>Gateway: Precise Coordinates Resolved (e.g., 28.6139° N, 77.2090° E)
-    Gateway->>Gateway: Extracts Patient Critical Baseline (Blood Group: B+, Allergies: Penicillin, Cardiac History)
+    Geocoder-->>Gateway: Precise Coordinates Resolved (Lat 28.6139 N, Long 77.2090 E)
+    Gateway->>Gateway: Extracts Patient Baseline (Blood Group B+, Allergies, Cardiac History)
     
     par Dual Dispatch Broadcast
-        Gateway->>Fleet: Broadcasts Urgent Dispatch to Nearest Advanced Life Support (ALS) Unit
-        Fleet->>Gateway: Unit #ALS-104 Acknowledges & En Route (ETA: 6 mins)
+        Gateway->>Fleet: Broadcasts Urgent Dispatch to Nearest Advanced Life Support Unit
+        Fleet->>Gateway: Unit ALS-104 Acknowledges and En Route (ETA 6 mins)
     and Trauma Notification
-        Gateway->>Trauma: Pre-alerts ER Trauma Desk with Incoming Patient Profile & ETA
+        Gateway->>Trauma: Pre-alerts ER Trauma Desk with Incoming Patient Profile and ETA
     end
     
-    Gateway-->>Caller: Displays Live Ambulance Radar Map & Paramedic Direct Line
-    Fleet->>Trauma: Arrives at Scene -> En Route -> Hospital ER Handover
+    Gateway-->>Caller: Displays Live Ambulance Radar Map and Paramedic Direct Line
+    Fleet->>Trauma: Paramedic Arrival at Scene, En Route, and Hospital Handover
     Trauma->>Gateway: Closes Emergency Incident; Ingests Field Vitals into Patient EHR
 ```
 
