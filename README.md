@@ -1,6 +1,8 @@
 # WIDA — Integrated Digital Healthcare Ecosystem
 ### Next-Generation Connected Health Platform: Patient, Doctor, Diagnostic Laboratory & Pharmacy Modules
 
+google document drive: https://drive.google.com/drive/folders/1pnvWmzLm5pdZR7xCYoRpBU02gC8QADIA
+
 [![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Frontend-black?style=flat&logo=vercel&logoColor=white)](https://vercel.com)
 [![Render Production](https://img.shields.io/badge/Render-Live%20Production%20API-46E3B7?style=flat&logo=render&logoColor=white)](https://wida.onrender.com)
 [![Netlify Mirror](https://api.netlify.com/api/v1/badges/e8cfdf92-6298-4c90-95e2-2a2b72445e99/deploy-status)](https://wida-health.netlify.app)
